@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Informasi QC</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f4f7f6; 
+      color: #333;
+    }
+    
+    .wrapper {
+      position: relative;
+      width: 400px;
+      height: 420px;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); 
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .form-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 40px;
+    }
+    
+    h2 {
+      font-size: 24px;
+      color: #222;
+      text-align: center;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 30px;
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+    
+    .input-group input {
+      width: 100%;
+      height: 48px;
+      font-size: 14px;
+      color: #333;
+      padding: 0 15px;
+      background: #fdfdfd;
+      border: 1px solid #e1e1e1;
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    
+    .input-group input:focus {
+      border-color: #ac6904; 
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+    
+    .input-group label {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #999;
+      pointer-events: none;
+      transition: 0.3s ease;
+    }
+    
+    .input-group input:focus ~ label,
+    .input-group input:valid ~ label {
+      top: 0;
+      left: 12px;
+      font-size: 12px;
+      color: #ac6904;
+      background: #fff;
+      padding: 0 4px;
+    }
+    
+    .remember {
+      margin-bottom: 20px;
+    }
+    
+    .remember label {
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .remember input {
+      accent-color: #ac6904;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
+    button {
+      width: 100%;
+      height: 48px;
+      background:#ac6904;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      transition: background 0.3s ease, transform 0.1s ease;
+    }
+    
+    button:hover {
+      background: #ac6904;
+    }
+    
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .demo-accounts {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+    }
+    .demo-accounts span {
+      display: block;
+      margin-top: 5px;
+      font-family: monospace;
+      color:#ac6904;
+    }
+  </style>
+</head>
+<body>
+  
+  <div>
+    <div class="wrapper">
+      <div class="form-wrapper sign-in">
+        <form id="loginForm">
+          <h2>Sistem Informasi QC</h2>
+          <p class="subtitle">Tracking Web</p>
+
+          <div class="input-group">
+            <input type="text" id="username" required>
+            <label for="username">Username</label>
+          </div>
+          <div class="input-group">
+            <input type="password" id="password" required>
+            <label for="password">Password</label>
+          </div>
+          
+          <div class="remember">
+            <label><input type="checkbox"> Ingat saya</label>
+          </div>
+          
+          <button type="submit">Masuk</button>
+        </form>
+      </div>
+    </div>
+
+  <!-- 1. Panggil file database.js -->
+  <script src="js/login-database.js"></script>
+
+  <!-- 2. Logika Utama Login -->
+ <!-- 1. Panggil file database.js -->
+  <script src="js/login-database.js"></script>
+
+  <!-- 2. Logika Utama Login -->
+  <script>
+    const formLogin = document.getElementById('loginForm');
+
+    formLogin.addEventListener('submit', function(event) {
+        event.preventDefault(); 
+
+        const inputUser = document.getElementById('username').value.trim();
+        const inputPass = document.getElementById('password').value.trim();
+
+        // Cari data inputan user di dalam array registeredAccounts (yang ada di login-database.js)
+        const user = registeredAccounts.find(acc => acc.username === inputUser && acc.password === inputPass);
+
+        if (user) {
+            // Jika ketemu (username dan password cocok), simpan rolenya
+            localStorage.setItem("active_user_role", user.role);
+            
+            // --- TAMBAHAN BARU: Simpan username ke memori browser ---
+            localStorage.setItem("loggedInUser", user.username);
+            
+            alert("Berhasil masuk! Selamat datang, " + user.role.toUpperCase() + ".");
+            
+            // Baris ini yang akan memindahkan halaman ke dashboard
+            // (Pastikan file dashboard kamu bernama dashboard.html)
+            window.location.href = 'dashboard.html'; 
+        } else {
+            // Jika tidak ada di daftar
+            alert("Akses Ditolak! Akun tidak terdaftar di sistem atau password salah.");
+        }
+    });
+  </script>
+</body>
+</html>
