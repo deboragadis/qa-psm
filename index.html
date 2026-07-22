@@ -125,7 +125,7 @@
 
       .input-group {
         position: relative;
-        margin-bottom: 24px;
+        margin-bottom: 30px;
       }
 
       /* --- EFEK TRANSPARAN PADA KOLOM INPUT --- */
@@ -166,11 +166,18 @@
 
       .input-group input:focus ~ label,
       .input-group input:valid ~ label {
-        top: -2px;
-        left: 12px;
-        font-size: 12px;
+        top: -11px; /* Naikkan posisi ke atas garis border */
+        left: 14px;
+        font-size: 11px;
         color: #818cf8;
-        background: transparent; /* Hapus background putih dari label */
+        background: rgba(
+          255,
+          255,
+          255,
+          0.05
+        ); /* Background gelap transparan agar menutupi garis border dengan rapi */
+        padding: 0 6px; /* Beri jarak di samping teks */
+        border-radius: 4px;
         font-weight: 600;
       }
 
