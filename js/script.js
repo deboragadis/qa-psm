@@ -66,7 +66,7 @@ function logoutUser() {
 
     // Arahkan kembali ke halaman login.
     // (Ganti 'login.html' dengan nama file halaman login kamu yang sebenarnya)
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   }
 }
 
