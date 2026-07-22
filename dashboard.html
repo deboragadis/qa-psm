@@ -10,6 +10,16 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    
+    <!-- CSS TAMBAHAN UNTUK FITUR SIDEBAR TOGGLE -->
+    <style>
+      .sidebar {
+        transition: all 0.3s ease; /* Transisi halus */
+      }
+      .sidebar.sembunyi {
+        display: none !important; /* Menyembunyikan sidebar saat tombol diklik */
+      }
+    </style>
   </head>
   <body>
     <div class="wrapper">
@@ -50,15 +60,20 @@
 
       <!-- Main Content -->
       <main class="content-wrapper">
-        <!-- Dashboard Header -->
-        <div class="dashboard-header">
-          <h1>Dashboard Utama</h1>
-          <p id="welcome-message">
-            Selamat datang,
-            <span id="nama-user" style="font-weight: 700; color: #3b82f6"
-              >Guest</span
-            >! 👋
-          </p>
+        <!-- Dashboard Header BARU (Sudah ada Hamburger Menu) -->
+        <div class="dashboard-header" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+          <!-- Tombol Hamburger -->
+          <button onclick="toggleSidebar()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: #3b82f6; padding: 5px;">
+            <i class="fas fa-bars"></i>
+          </button>
+          
+          <div>
+            <h1 style="margin: 0;">Dashboard Utama</h1>
+            <p id="welcome-message" style="margin: 0; margin-top: 5px;">
+              Selamat datang,
+              <span id="nama-user" style="font-weight: 700; color: #3b82f6">Guest</span>! 👋
+            </p>
+          </div>
         </div>
 
         <!-- Tab: Tracking (Tab Aktif Pertama) -->
@@ -102,7 +117,6 @@
                     <th>Status</th>
                   </tr>
                 </thead>
-                <!-- INI YANG BERUBAH: Tambahkan tbody dengan id="tabel-tracking" -->
                 <tbody id="tabel-tracking">
                   <tr>
                     <td colspan="5" style="text-align: center; color: #64748b">
@@ -150,10 +164,7 @@
               </p>
 
               <div style="margin-bottom: 15px">
-                <label style="font-weight: 600; color: #475569"
-                  >Product *</label
-                >
-                <!-- INI YANG BERUBAH: Tambahkan id="input-product" -->
+                <label style="font-weight: 600; color: #475569">Product *</label>
                 <select
                   id="input-product"
                   style="
@@ -171,10 +182,7 @@
               </div>
 
               <div style="margin-bottom: 15px">
-                <label style="font-weight: 600; color: #475569"
-                  >Serial Number *</label
-                >
-                <!-- INI YANG BERUBAH: Tambahkan id="input-sn" -->
+                <label style="font-weight: 600; color: #475569">Serial Number *</label>
                 <input
                   type="text"
                   id="input-sn"
@@ -189,7 +197,6 @@
                 />
               </div>
 
-              <!-- INI YANG BERUBAH: Tambahkan onclick="simpanDataBaru()" -->
               <button
                 class="btn-primary"
                 onclick="simpanDataBaru()"
@@ -201,7 +208,7 @@
           </div>
         </section>
 
-        <!-- Wadah untuk tab lainnya (kosong agar siap diisi) -->
+        <!-- Wadah untuk tab lainnya -->
         <section id="update" class="tab-content"></section>
         <section id="packing" class="tab-content"></section>
         <section id="report" class="tab-content"></section>
@@ -209,7 +216,15 @@
       </main>
     </div>
 
-    <!-- Link ke file JavaScript -->
+    <!-- JS TAMBAHAN UNTUK FITUR SIDEBAR TOGGLE -->
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('sembunyi');
+      }
+    </script>
+
+    <!-- Link ke file JavaScript Utamamu -->
     <script src="js/script.js"></script>
   </body>
 </html>
