@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Tag meta viewport di bawah ini sangat penting agar responsif di HP berfungsi -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Informasi QC</title>
   <style>
@@ -26,8 +27,11 @@
     
     .wrapper {
       position: relative;
-      width: 400px;
-      height: 420px;
+      /* PERUBAHAN RESPONSIVE: Lebar dibuat fleksibel */
+      width: 100%;
+      max-width: 400px; 
+      min-height: 420px;
+      margin: 20px; /* Memberi jarak agar tidak nempel di pinggir layar HP */
       background: #fff;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); 
       border-radius: 12px;
@@ -79,7 +83,7 @@
     .input-group input:focus {
       border-color: #ac6904; 
       background: #fff;
-      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+      box-shadow: 0 0 0 3px rgba(172, 105, 4, 0.1); /* Disesuaikan dengan warna aksen */
     }
     
     .input-group label {
@@ -126,7 +130,7 @@
     button {
       width: 100%;
       height: 48px;
-      background:#ac6904;
+      background: #ac6904;
       color: #fff;
       font-size: 15px;
       font-weight: 500;
@@ -138,62 +142,61 @@
     }
     
     button:hover {
-      background: #ac6904;
+      background: #965c04; /* Sedikit lebih gelap saat di-hover */
     }
     
     button:active {
       transform: scale(0.98);
     }
 
-    .demo-accounts {
-      margin-top: 30px;
-      text-align: center;
-      font-size: 12px;
-      color: #777;
-    }
-    .demo-accounts span {
-      display: block;
-      margin-top: 5px;
-      font-family: monospace;
-      color:#ac6904;
+    /* ========================================= */
+    /* MEDIA QUERIES (UNTUK LAYAR HP)            */
+    /* ========================================= */
+    @media (max-width: 480px) {
+      .form-wrapper {
+        padding: 30px 20px; /* Padding dikurangi di layar HP */
+      }
+      
+      h2 {
+        font-size: 22px; /* Judul sedikit dikecilkan */
+      }
+
+      .input-group input, button {
+        height: 44px; /* Tombol dan inputan sedikit lebih ramping */
+      }
     }
   </style>
 </head>
 <body>
   
-  <div>
-    <div class="wrapper">
-      <div class="form-wrapper sign-in">
-        <form id="loginForm">
-          <h2>Sistem Informasi QC</h2>
-          <p class="subtitle">Tracking Web</p>
+  <div class="wrapper">
+    <div class="form-wrapper sign-in">
+      <form id="loginForm">
+        <h2>Sistem Informasi QC</h2>
+        <p class="subtitle">Tracking Web</p>
 
-          <div class="input-group">
-            <input type="text" id="username" required>
-            <label for="username">Username</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="password" required>
-            <label for="password">Password</label>
-          </div>
-          
-          <div class="remember">
-            <label><input type="checkbox"> Ingat saya</label>
-          </div>
-          
-          <button type="submit">Masuk</button>
-        </form>
-      </div>
+        <div class="input-group">
+          <input type="text" id="username" required autocomplete="off">
+          <label for="username">Username</label>
+        </div>
+        <div class="input-group">
+          <input type="password" id="password" required autocomplete="off">
+          <label for="password">Password</label>
+        </div>
+        
+        <div class="remember">
+          <label><input type="checkbox"> Ingat saya</label>
+        </div>
+        
+        <button type="submit">Masuk</button>
+      </form>
     </div>
+  </div>
 
-  <!-- 1. Panggil file database.js -->
+  <!-- Panggil file database.js (Cukup 1 kali saja) -->
   <script src="js/login-database.js"></script>
 
-  <!-- 2. Logika Utama Login -->
- <!-- 1. Panggil file database.js -->
-  <script src="js/login-database.js"></script>
-
-  <!-- 2. Logika Utama Login -->
+  <!-- Logika Utama Login -->
   <script>
     const formLogin = document.getElementById('loginForm');
 
@@ -203,23 +206,16 @@
         const inputUser = document.getElementById('username').value.trim();
         const inputPass = document.getElementById('password').value.trim();
 
-        // Cari data inputan user di dalam array registeredAccounts (yang ada di login-database.js)
+        // Cari data inputan user di dalam array registeredAccounts
         const user = registeredAccounts.find(acc => acc.username === inputUser && acc.password === inputPass);
 
         if (user) {
-            // Jika ketemu (username dan password cocok), simpan rolenya
             localStorage.setItem("active_user_role", user.role);
-            
-            // --- TAMBAHAN BARU: Simpan username ke memori browser ---
             localStorage.setItem("loggedInUser", user.username);
             
             alert("Berhasil masuk! Selamat datang, " + user.role.toUpperCase() + ".");
-            
-            // Baris ini yang akan memindahkan halaman ke dashboard
-            // (Pastikan file dashboard kamu bernama dashboard.html)
             window.location.href = 'dashboard.html'; 
         } else {
-            // Jika tidak ada di daftar
             alert("Akses Ditolak! Akun tidak terdaftar di sistem atau password salah.");
         }
     });
