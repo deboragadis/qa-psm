@@ -32,6 +32,13 @@ body {
     display: flex;
     flex-direction: column;
     flex-shrink: 0; 
+    transition: margin-left 0.3s ease, opacity 0.3s ease; /* Efek transisi mulus */
+}
+
+/* Class untuk menyembunyikan sidebar dengan animasi geser */
+.sidebar.sembunyi {
+    margin-left: -280px; 
+    opacity: 0;
 }
 
 .sidebar-header {
@@ -66,9 +73,14 @@ body {
     border-left: 4px solid #3b82f6;
 }
 
-.sidebar-menu i { margin-right: 10px; width: 20px;}
+.sidebar-menu i { 
+    margin-right: 10px; 
+    width: 20px;
+}
 
-.sidebar-footer { padding: 20px; }
+.sidebar-footer { 
+    padding: 20px; 
+}
 
 /* --- Main Content Styling --- */
 .content-wrapper {
@@ -76,6 +88,7 @@ body {
     padding: 30px;
     overflow-y: auto;
     background-color: #f8fafc;
+    transition: width 0.3s ease;
 }
 
 /* Header Dashboard (Selamat Datang) */
@@ -157,7 +170,9 @@ body {
     border-radius: 14px 14px 0 0;
 }
 
-.card-body { padding: 20px; }
+.card-body { 
+    padding: 20px; 
+}
 
 /* --- Buttons & Utilities --- */
 button {
@@ -170,7 +185,10 @@ button {
     transition: 0.2s;
 }
 
-button:hover { transform: translateY(-2px); opacity: 0.9; }
+button:hover { 
+    transform: translateY(-2px); 
+    opacity: 0.9; 
+}
 
 .btn-danger { background-color: #ef4444; color: white; }
 .btn-primary { background-color: #3b82f6; color: white; }
@@ -184,3 +202,42 @@ button:hover { transform: translateY(-2px); opacity: 0.9; }
 .data-table th, .data-table td { padding: 14px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px;}
 .data-table th { background: #f8fafc; color: #475569; font-weight: 600; }
 .data-table tr:hover { background-color: #f1f5f9; }
+
+/* ========================================= */
+/* MEDIA QUERIES (RESPONSIVE UNTUK HP/TABLET)*/
+/* ========================================= */
+@media (max-width: 768px) {
+    /* Sidebar melayang di atas konten saat di layar HP */
+    .sidebar {
+        position: absolute;
+        height: 100%;
+        z-index: 999;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+    }
+
+    /* Ubah padding utama agar tidak terlalu sempit di layar kecil */
+    .content-wrapper {
+        padding: 20px 15px;
+    }
+
+    /* Kecilkan ukuran teks judul */
+    .dashboard-header h1 {
+        font-size: 20px;
+    }
+
+    /* Menyusun kotak warna (Value Box) & Grafik jadi atas-bawah */
+    .row {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Paksa card (tabel & grafik) untuk mengambil 100% lebar layar */
+    .card {
+        width: 100% !important;
+    }
+
+    /* Agar tabel tidak berantakan, buat area card-body bisa di-scroll ke kanan/kiri */
+    .card-body {
+        overflow-x: auto;
+    }
+}
