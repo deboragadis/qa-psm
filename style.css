@@ -34,13 +34,12 @@ body {
 
 /* --- Sidebar Styling --- */
 .sidebar {
-  width: 280px;
+  width: 220px;
   background-color: #ffffff;
   border-right: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  /* INI YANG BERUBAH: Efek transisi smooth seperti digeser */
   transition:
     margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1),
     opacity 0.4s ease;
@@ -48,7 +47,7 @@ body {
 
 /* Class untuk menyembunyikan sidebar dengan animasi geser */
 .sidebar.sembunyi {
-  margin-left: -280px;
+  margin-left: -220px;
   opacity: 0;
 }
 
@@ -100,7 +99,6 @@ body {
   padding: 30px;
   overflow-y: auto;
   background-color: #f8fafc;
-  /* INI YANG BERUBAH: Lebar konten utama ikut menyesuaikan pergerakan sidebar dengan smooth */
   transition:
     margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1),
     width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
@@ -282,19 +280,39 @@ button:hover {
 }
 
 /* ========================================= */
-/* MEDIA QUERIES (RESPONSIVE UNTUK HP/TABLET)*/
+/* MEDIA QUERIES (MODEL SCROLLING UNTUK HP)  */
 /* ========================================= */
 @media (max-width: 768px) {
-  /* Sidebar melayang di atas konten saat di layar HP */
-  .sidebar {
-    position: absolute;
-    height: 100%;
-    z-index: 999;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+  /* Hilangkan kunci tinggi layar dan izinkan body melakukan scroll */
+  body {
+    height: auto !important;
+    overflow: auto !important;
   }
 
-  /* Ubah padding utama agar tidak terlalu sempit di layar kecil */
+  /* Ubah wrapper utama menjadi susunan ke bawah (kolom) */
+  .wrapper {
+    flex-direction: column;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Sidebar disesuaikan agar ukurannya pas di layar kecil */
+  .sidebar {
+    position: relative;
+    width: 100% !important;
+    height: auto;
+  }
+
+  /* Ubah status sembunyi sidebar di HP */
+  .sidebar.sembunyi {
+    display: none !important;
+    margin-left: 0;
+  }
+
+  /* Konten utama mengikuti alur scroll halaman */
   .content-wrapper {
+    height: auto !important;
+    overflow-y: visible !important;
     padding: 20px 15px;
   }
 
@@ -303,18 +321,18 @@ button:hover {
     font-size: 20px;
   }
 
-  /* Menyusun kotak warna (Value Box) & Grafik jadi atas-bawah */
+  /* Menyusun kotak statistik (Value Box) & Grafik jadi atas-bawah */
   .row {
     flex-direction: column;
     gap: 15px;
   }
 
-  /* Paksa card (tabel & grafik) untuk mengambil 100% lebar layar */
+  /* Paksa card (tabel & grafik) mengambil 100% lebar layar */
   .card {
     width: 100% !important;
   }
 
-  /* Agar tabel tidak berantakan, buat area card-body bisa di-scroll ke kanan/kiri */
+  /* Agar tabel tetap aman, berikan fitur scroll horizontal khusus tabelnya */
   .card-body {
     overflow-x: auto;
   }
