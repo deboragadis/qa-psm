@@ -1,28 +1,48 @@
 // =========================================================================
+// 0. INISIALISASI FIREBASE & SDK
+// =========================================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBPhQiSUsMueMYkQ0i680epEKQ7pYDsT_I",
+  authDomain: "sitraqfmlx.firebaseapp.com",
+  projectId: "sitraqfmlx",
+  storageBucket: "sitraqfmlx.firebasestorage.app",
+  messagingSenderId: "716935536178",
+  appId: "1:716935536178:web:079ce066b79988d261262b",
+  measurementId: "G-MP4FT9HRRD"
+};
+
+// Inisialisasi Firebase & Firestore
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+const COLLECTION_NAME = "dataSitraq"; // Nama koleksi di Firebase Firestore
+
+// =========================================================================
 // 1. AMBIL DATA USER LOGIN DARI STORAGE
 // =========================================================================
 const currentUser = localStorage.getItem("loggedInUser") || "Guest";
 
-// Fungsi untuk mengganti nama di layar (Dashboard Header)
 function tampilkanNamaUser(username) {
   const elemenNama = document.getElementById("nama-user");
-
   if (elemenNama) {
     const namaFormat = username.charAt(0).toUpperCase() + username.slice(1);
     elemenNama.innerText = namaFormat;
   }
 }
 
-// Menjalankan fungsi otomatis saat elemen HTML selesai dimuat
 document.addEventListener("DOMContentLoaded", () => {
   tampilkanNamaUser(currentUser);
-  renderTabelTracking();
+  window.renderTabelTracking(); // Ambil data awal dari Cloud
 });
 
 // =========================================================================
 // 2. MANAJEMEN TAB SIDEBAR
 // =========================================================================
-function showTab(tabId) {
+window.showTab = function(tabId) {
   const contents = document.querySelectorAll(".tab-content");
   contents.forEach((content) => {
     content.classList.remove("active");
@@ -46,94 +66,94 @@ function showTab(tabId) {
   if (activeMenu) {
     activeMenu.classList.add("active");
   }
-}
+};
 
 // =========================================================================
 // 3. LOGIKA LOGOUT
 // =========================================================================
-function logoutUser() {
+window.logoutUser = function() {
   const konfirmasi = confirm("Apakah Anda yakin ingin keluar?");
-
   if (konfirmasi) {
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("active_user_role");
     window.location.href = "index.html";
   }
-}
+};
 
 // =========================================================================
-// 4. LOGIKA DATABASE SEMENTARA & CRUD
+// 4. LOGIKA DATABASE CLOUD (FIREBASE), CRUD & CHARTS
 // =========================================================================
+let dbSistem = [];
 
-// Mengambil data dari localStorage browser
-let dbSistem = JSON.parse(localStorage.getItem("dataXTAL")) || [];
+let barChartInstance = null;
+let donutChartInstance = null;
 
-// Fungsi untuk menyimpan data dari form Input Sistem Baru
-function simpanDataBaru() {
+// Fungsi untuk menyimpan data baru ke Cloud Firestore
+window.simpanDataBaru = async function() {
   const valProduct = document.getElementById("input-product").value;
   const valSN = document.getElementById("input-sn").value.trim();
+  const valPO = document.getElementById("input-po") ? document.getElementById("input-po").value.trim() : "-";
   const valStartDate = document.getElementById("input-date1") ? document.getElementById("input-date1").value : "-";
   const valEndDate = document.getElementById("input-date2") ? document.getElementById("input-date2").value : "-";
 
-  // Validasi: Cek input kosong
   if (valSN === "") {
     alert("Peringatan: Serial Number harus diisi!");
     return;
   }
 
-  // Validasi: Cek duplikat Serial Number
   const cekDuplikat = dbSistem.find((item) => item.sn === valSN);
   if (cekDuplikat) {
     alert(`Gagal! Serial Number ${valSN} sudah terdaftar di sistem.`);
     return;
   }
 
-  // Objek data baru
-  const dataBaru = {
-    product: valProduct,
-    sn: valSN,
-    startDate: valStartDate,
-    endDate: valEndDate,
-    progres: 0,
-    status: "New",
-  };
+  try {
+    const dataBaru = {
+      product: valProduct,
+      sn: valSN,
+      po: valPO,
+      startDate: valStartDate,
+      endDate: valEndDate,
+      progres: 0,
+      status: "New",
+      createdAt: new Date()
+    };
 
-  // Simpan ke array dan localStorage
-  dbSistem.push(dataBaru);
-  localStorage.setItem("dataXTAL", JSON.stringify(dbSistem));
+    await addDoc(collection(db, COLLECTION_NAME), dataBaru);
+    alert("Sukses! Data Sistem berhasil disimpan ke Cloud.");
 
-  alert("Sukses! Data Sistem berhasil disimpan.");
+    // Reset form input
+    document.getElementById("input-sn").value = "";
+    if (document.getElementById("input-po")) document.getElementById("input-po").value = "";
+    if (document.getElementById("input-date1")) document.getElementById("input-date1").value = "";
+    if (document.getElementById("input-date2")) document.getElementById("input-date2").value = "";
 
-  // Reset input form
-  document.getElementById("input-sn").value = "";
-  if (document.getElementById("input-date1")) document.getElementById("input-date1").value = "";
-  if (document.getElementById("input-date2")) document.getElementById("input-date2").value = "";
+    window.renderTabelTracking();
+    window.showTab("tracking");
+  } catch (error) {
+    console.error("Gagal menyimpan data:", error);
+    alert("Terjadi kesalahan saat menyimpan ke cloud.");
+  }
+};
 
-  // Perbarui tabel dan arahkan ke tab tracking
-  renderTabelTracking();
-  showTab("tracking");
-}
-
-// Fungsi untuk menghapus data berdasarkan Serial Number (SN)
-function hapusData(sn) {
+// Fungsi untuk menghapus data dari Cloud Firestore berdasarkan ID dokumen
+window.hapusData = async function(docId, sn) {
   const konfirmasi = confirm(`Apakah Anda yakin ingin menghapus data dengan SN: ${sn}?`);
   if (!konfirmasi) return;
 
-  // Filter array untuk membuang data yang memiliki SN yang sama
-  dbSistem = dbSistem.filter((item) => item.sn !== sn);
+  try {
+    await deleteDoc(doc(db, COLLECTION_NAME, docId));
+    alert("Data berhasil dihapus dari Cloud!");
+    window.renderTabelTracking();
+  } catch (error) {
+    console.error("Gagal menghapus data:", error);
+    alert("Gagal menghapus data.");
+  }
+};
 
-  // Simpan kembali data terbaru ke localStorage
-  localStorage.setItem("dataXTAL", JSON.stringify(dbSistem));
-
-  alert("Data berhasil dihapus!");
-
-  // Perbarui tampilan tabel dan ringkasan
-  renderTabelTracking();
-}
-
-// Fungsi untuk memperbarui angka pada box ringkasan di bagian atas tracking
+// Fungsi untuk memperbarui angka pada box ringkasan
 function updateSummaryBoxes() {
-  const totalSistem = dbSistem.length;
+  const totalRI = dbSistem.filter(item => item.product === "Rock Imager").length;
   const totalNT8 = dbSistem.filter(item => item.product === "NT8").length;
   const totalFormulator = dbSistem.filter(item => item.product === "Formulator").length;
   const totalQCSelesai = dbSistem.filter(item => item.progres === 100 || item.status === "Completed").length;
@@ -141,7 +161,7 @@ function updateSummaryBoxes() {
 
   const valueBoxes = document.querySelectorAll("#tracking .value-box p");
   if (valueBoxes.length >= 5) {
-    valueBoxes[0].innerText = totalSistem;
+    valueBoxes[0].innerText = totalRI;
     valueBoxes[1].innerText = totalNT8;
     valueBoxes[2].innerText = totalFormulator;
     valueBoxes[3].innerText = totalQCSelesai;
@@ -149,40 +169,113 @@ function updateSummaryBoxes() {
   }
 }
 
-// Fungsi untuk menampilkan (me-render) isi data ke dalam Tabel Tracking Overview
-function renderTabelTracking() {
+// Fungsi untuk merender grafik Chart.js
+function renderCharts() {
+  const barCtx = document.getElementById('barChart');
+  if (barCtx) {
+    const labels = dbSistem.map(item => item.sn);
+    const dataProgres = dbSistem.map(item => item.progres);
+
+    if (barChartInstance) {
+      barChartInstance.destroy();
+    }
+
+    barChartInstance = new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: labels.length > 0 ? labels : ['Belum Ada Data'],
+        datasets: [{
+          label: 'Progres (%)',
+          data: dataProgres.length > 0 ? dataProgres : [0],
+          backgroundColor: '#3b82f6',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    });
+  }
+
+  const donutCtx = document.getElementById('donutChart');
+  if (donutCtx) {
+    const countRI = dbSistem.filter(item => item.product === 'Rock Imager').length;
+    const countNT8 = dbSistem.filter(item => item.product === 'NT8').length;
+    const countFormulator = dbSistem.filter(item => item.product === 'Formulator').length;
+
+    if (donutChartInstance) {
+      donutChartInstance.destroy();
+    }
+
+    donutChartInstance = new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Rock Imager', 'NT8', 'Formulator'],
+        datasets: [{
+          data: [countRI, countNT8, countFormulator],
+          backgroundColor: ['#3b82f6', '#f59e0b', '#10b981']
+        }]
+      },
+      options: {
+        responsive: true
+      }
+    });
+  }
+}
+
+// Fungsi utama untuk menarik data dari Cloud Firestore dan menampilkannya ke Tabel
+window.renderTabelTracking = async function() {
   const tbody = document.getElementById("tabel-tracking");
   if (!tbody) return; 
 
-  tbody.innerHTML = "";
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">Memuat data dari Cloud...</td></tr>`;
 
-  // Jika data kosong
-  if (dbSistem.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">Data kosong. Silakan Input Sistem Baru.</td></tr>`;
+  try {
+    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+    dbSistem = [];
+    querySnapshot.forEach((docSnap) => {
+      // Menyimpan ID unik Firestore agar bisa dipakai saat hapus data
+      dbSistem.push({ id: docSnap.id, ...docSnap.data() });
+    });
+
+    tbody.innerHTML = "";
+
+    if (dbSistem.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">Data kosong. Silakan Input Sistem Baru.</td></tr>`;
+      updateSummaryBoxes();
+      renderCharts();
+      return;
+    }
+
+    dbSistem.forEach((item) => {
+      const tr = document.createElement("tr");
+      let statusWarna = item.progres === 100 ? "#10b981" : "#3b82f6";
+
+      tr.innerHTML = `
+        <td style="font-weight: 600;">${item.product}</td>
+        <td>${item.sn}</td>
+        <td style="color: #64748b;">${item.startDate} s/d ${item.endDate}</td>
+        <td><strong>${item.progres}%</strong></td>
+        <td><span style="background-color: ${statusWarna}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">${item.status}</span></td>
+        <td>
+          <button onclick="hapusData('${item.id}', '${item.sn}')" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+            <i class="fas fa-trash"></i> Hapus
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
     updateSummaryBoxes();
-    return;
+    renderCharts();
+  } catch (error) {
+    console.error("Gagal mengambil data:", error);
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 20px;">Gagal memuat data dari Cloud.</td></tr>`;
   }
-
-  // Looping data ke baris tabel
-  dbSistem.forEach((item) => {
-    const tr = document.createElement("tr");
-    let statusWarna = item.progres === 100 ? "#10b981" : "#3b82f6";
-
-    tr.innerHTML = `
-      <td style="font-weight: 600;">${item.product}</td>
-      <td>${item.sn}</td>
-      <td style="color: #64748b;">${item.startDate} s/d ${item.endDate}</td>
-      <td><strong>${item.progres}%</strong></td>
-      <td><span style="background-color: ${statusWarna}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">${item.status}</span></td>
-      <td>
-        <button onclick="hapusData('${item.sn}')" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
-          <i class="fas fa-trash"></i> Hapus
-        </button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Update angka ringkasan
-  updateSummaryBoxes();
-}
+};
