@@ -129,7 +129,25 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-header">⚙️ Live Monitoring Progress Sistem</div>
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>⚙️ Live Monitoring Progress Sistem</span>
+              
+              <div style="display: flex; gap: 8px;">
+                <!-- Input File Tersembunyi untuk Import -->
+                <input type="file" id="import-file" accept=".csv" style="display: none;" onchange="importFromCSV(event)">
+                
+                <!-- Tombol Import -->
+                <button onclick="document.getElementById('import-file').click()" style="background-color: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                  <i class="fas fa-file-import"></i> Import Excel
+                </button>
+
+                <!-- Tombol Export -->
+                <button onclick="exportToCSV()" style="background-color: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                  <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+              </div>
+
+            </div>
             <div class="card-body">
               <!-- Tabel Data -->
               <table class="data-table">
