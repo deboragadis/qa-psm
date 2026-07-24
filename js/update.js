@@ -1,10 +1,64 @@
-import { db, COLLECTION_NAME } from "./firebase.js";
-import { tampilkanNamaUser } from "./common.js";
-import { collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// =========================================================================
+// 0. INISIALISASI FIREBASE & SDK
+// =========================================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBPhQiSUsMueMYkQ0i680epEKQ7pYDsT_I",
+  authDomain: "sitraqfmlx.firebaseapp.com",
+  projectId: "sitraqfmlx",
+  storageBucket: "sitraqfmlx.firebasestorage.app",
+  messagingSenderId: "716935536178",
+  appId: "1:716935536178:web:079ce066b79988d261262b",
+  measurementId: "G-MP4FT9HRRD"
+};
+
+// Inisialisasi Firebase & Firestore
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+const COLLECTION_NAME = "dataSitraq";
+
+// =========================================================================
+// 1. AMBIL DATA USER & SIDEBAR (COMMON LOGIC)
+// =========================================================================
+const currentUser = localStorage.getItem("loggedInUser") || "Guest";
+
+function tampilkanNamaUser() {
+  const elemenNama = document.getElementById("nama-user");
+  if (elemenNama) {
+    const namaFormat = currentUser.charAt(0).toUpperCase() + currentUser.slice(1);
+    elemenNama.innerText = namaFormat;
+  }
+}
+
+// Fungsi Toggle Sidebar untuk Desktop & HP
+window.toggleSidebar = function() {
+  const sidebar = document.querySelector(".sidebar");
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle("mobile-show");
+  } else {
+    sidebar.classList.toggle("sembunyi");
+  }
+};
+
+// Fungsi Logout
+window.logoutUser = function() {
+  const konfirmasi = confirm("Apakah Anda yakin ingin keluar?");
+  if (konfirmasi) {
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("active_user_role");
+    window.location.href = "index.html";
+  }
+};
+
+// =========================================================================
+// 2. LOGIKA UPDATE PROGRES QC
+// =========================================================================
 let dbSistem = [];
 
-// Tarik data dari Cloud Firestore
 async function fetchAllData() {
   try {
     const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
@@ -17,7 +71,6 @@ async function fetchAllData() {
   }
 }
 
-// Masukkan data SN ke elemen dropdown `<select>`
 function populateUpdateDropdown() {
   const selectSN = document.getElementById("update-sn");
   if (!selectSN) return;
@@ -31,7 +84,6 @@ function populateUpdateDropdown() {
   });
 }
 
-// Otomatis isi kolom progres & status saat SN dipilih
 window.isiOtomatisUpdate = function() {
   const selectedSN = document.getElementById("update-sn").value;
   const targetItem = dbSistem.find(item => item.sn === selectedSN);
@@ -45,7 +97,6 @@ window.isiOtomatisUpdate = function() {
   }
 };
 
-// Simpan perubahan progres ke Cloud Firestore
 window.simpanUpdateProgres = async function() {
   const selectedSN = document.getElementById("update-sn").value;
   const newProgres = Number(document.getElementById("update-progres").value);
@@ -82,7 +133,7 @@ window.simpanUpdateProgres = async function() {
   }
 };
 
-// Inisialisasi saat halaman selesai dimuat
+// Inisialisasi saat halaman update.html dimuat
 document.addEventListener("DOMContentLoaded", async () => {
   tampilkanNamaUser();
   await fetchAllData();
