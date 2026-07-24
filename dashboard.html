@@ -15,24 +15,20 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-
-    <!-- CSS TAMBAHAN UNTUK FITUR SIDEBAR TOGGLE -->
-    <style>
-      .sidebar {
-        transition: all 0.3s ease;
-      }
-      .sidebar.sembunyi {
-        display: none !important;
-      }
-    </style>
   </head>
   <body>
     <div class="wrapper">
       <!-- Sidebar -->
       <aside class="sidebar">
-        <div class="sidebar-header">
-          <h2>SITRAQ</h2>
-          <p>Sistem Informasi QC Instrument</p>
+        <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
+          <div>
+            <h2 style="margin: 0;">SITRAQ</h2>
+            <p style="margin: 0; font-size: 11px; color: #64748b;">Sistem Informasi QC Instrument</p>
+          </div>
+          <!-- Tombol Close (X) untuk Mobile Drawer & Desktop Collapse -->
+          <button onclick="toggleSidebar()" style="background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; width: auto !important; padding: 5px; box-shadow: none !important;">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
         <ul class="sidebar-menu">
           <li class="active" onclick="showTab('tracking')">
@@ -314,14 +310,6 @@
         <section id="audit" class="tab-content"></section>
       </main>
     </div>
-
-    <!-- JS TAMBAHAN UNTUK FITUR SIDEBAR TOGGLE -->
-    <script>
-      function toggleSidebar() {
-        const sidebar = document.querySelector(".sidebar");
-        sidebar.classList.toggle("sembunyi");
-      }
-    </script>
 
     <!-- Link ke file JavaScript Utama (Menggunakan type="module" untuk Firebase) -->
     <script type="module" src="js/script.js"></script>
