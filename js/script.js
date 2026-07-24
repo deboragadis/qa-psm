@@ -279,3 +279,91 @@ window.renderTabelTracking = async function() {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 20px;">Gagal memuat data dari Cloud.</td></tr>`;
   }
 };
+
+// =========================================================================
+// 5. FITUR EXPORT CSV / EXCEL
+// =========================================================================
+window.exportToCSV = function() {
+  if (!dbSistem || dbSistem.length === 0) {
+    alert("Tidak ada data yang bisa diexport! Data masih kosong.");
+    return;
+  }
+
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Product,Serial Number,PO Number,Start Date,End Date,Progres (%),Status\n";
+
+  dbSistem.forEach(item => {
+    let row = [
+      `"${item.product || ''}"`,
+      `"${item.sn || ''}"`,
+      `"${item.po || ''}"`,
+      `"${item.startDate || ''}"`,
+      `"${item.endDate || ''}"`,
+      `"${item.progres || 0}"`,
+      `"${item.status || ''}"`
+    ];
+    csvContent += row.join(",") + "\n";
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "data_sitraq_export.csv");
+  document.body.appendChild(link);
+  
+  link.click();
+  document.body.removeChild(link);
+};
+
+// =========================================================================
+// 6. FITUR IMPORT CSV / EXCEL KE CLOUD
+// =========================================================================
+window.importFromCSV = async function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const text = e.target.result;
+    const lines = text.split("\n");
+    
+    let successCount = 0;
+    
+    // Mulai dari baris 1 (karena baris 0 adalah Header kolom)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      // Memecah kolom CSV dengan aman
+      const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.replace(/^"|"$/g, '').trim());
+      
+      if (cols.length >= 2) {
+        const [product, sn, po, startDate, endDate, progres, status] = cols;
+        
+        if (sn) {
+          try {
+            await addDoc(collection(db, COLLECTION_NAME), {
+              product: product || "NT8",
+              sn: sn,
+              po: po || "-",
+              startDate: startDate || "-",
+              endDate: endDate || "-",
+              progres: Number(progres) || 0,
+              status: status || "New",
+              createdAt: new Date()
+            });
+            successCount++;
+          } catch (err) {
+            console.error("Gagal import baris SN:", sn, err);
+          }
+        }
+      }
+    }
+
+    alert(`Import selesai! Berhasil menambahkan ${successCount} data ke Cloud.`);
+    event.target.value = ""; // Reset input file
+    window.renderTabelTracking(); // Refresh tampilan tabel & chart
+  };
+  
+  reader.readAsText(file);
+};
