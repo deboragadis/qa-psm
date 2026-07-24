@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoring Dashboard - Sistem Informasi QC Instrument</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="assets/fmlx.png">
+    
+    <!-- PUSTAKA CHART.JS UNTUK GRAFIK -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Menggunakan Font Awesome untuk Icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
+          <div>
+            <h2 style="margin: 0;">SITRAQ</h2>
+            <p style="margin: 0; font-size: 11px; color: #64748b;">Sistem Informasi QC Instrument</p>
+          </div>
+          <!-- Tombol Close (X) untuk Mobile Drawer & Desktop Collapse -->
+          <button onclick="toggleSidebar()" style="background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; width: auto !important; padding: 5px; box-shadow: none !important;">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <ul class="sidebar-menu">
+          <li onclick="location.href='dashboard.html'">
+            <i class="fas fa-chart-line"></i> Tracking Overview
+          </li>
+          <li class="active" onclick="location.href='monitoring.html'">
+            <i class="fas fa-chart-bar"></i> Monitoring Dashboard
+          </li>
+          <li onclick="location.href='input_sistem.html'">
+            <i class="fas fa-plus"></i> Input Sistem Baru
+          </li>
+          <li onclick="location.href='update.html'">
+            <i class="fas fa-check-double"></i> Update Progres QC
+          </li>
+          <li onclick="location.href='packing.html'">
+            <i class="fas fa-box"></i> Packing Progress
+          </li>
+          <li onclick="location.href='report.html'">
+            <i class="fas fa-envelope"></i> Email Prod. Report
+          </li>
+          <li onclick="location.href='audit.html'">
+            <i class="fas fa-history"></i> Audit Trail Log
+          </li>
+        </ul>
+        <div class="sidebar-footer">
+          <button class="btn-danger" onclick="logoutUser()">
+            <i class="fas fa-sign-out-alt"></i> Log Out
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="content-wrapper">
+        <!-- Dashboard Header -->
+        <div
+          class="dashboard-header"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+          "
+        >
+          <!-- Tombol Hamburger -->
+          <button
+            onclick="toggleSidebar()"
+            style="
+              background: transparent;
+              border: none;
+              font-size: 24px;
+              cursor: pointer;
+              color: #3b82f6;
+              padding: 5px;
+              width: auto !important;
+              box-shadow: none !important;
+            "
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div>
+            <h1 style="margin: 0">Monitoring Dashboard</h1>
+            <p id="welcome-message" style="margin: 0; margin-top: 5px">
+              Selamat datang,
+              <span id="nama-user" style="font-weight: 700; color: #3b82f6"
+                >Guest</span
+              >! 👋
+            </p>
+          </div>
+        </div>
+
+        <!-- Tab: Monitoring Charts -->
+        <section id="monitoring" class="tab-content active">
+          <div class="row">
+            <div class="card" style="width: 60%">
+              <div class="card-header">
+                📊 OPSI 1: Progres Real-Time Per Unit Robot
+              </div>
+              <div class="card-body" id="bar-chart-container">
+                <p class="subtitle">
+                  Menampilkan persentase pencapaian total checklist QC.
+                </p>
+                <!-- Canvas untuk Bar Chart -->
+                <canvas id="barChart" style="max-height: 250px;"></canvas>
+              </div>
+            </div>
+            <div class="card" style="width: 40%">
+              <div class="card-header">
+                📈 OPSI 2: Distribusi Volume Lifecycle
+              </div>
+              <div class="card-body">
+                <!-- Canvas untuk Donut Chart -->
+                <canvas id="donutChart" style="max-height: 250px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Link ke file JavaScript Utama (Menggunakan type="module" untuk Firebase) -->
+    <script type="module" src="js/script.js"></script>
+  </body>
+</html>

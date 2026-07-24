@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Informasi QC</title>
+    <link rel="icon" type="image/png" href="assets/fmlx.png">
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        color: #334155;
+      }
+
+      /* --- VIDEO BACKGROUND --- */
+      .video-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+      }
+
+      .bg-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .video-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(
+          15,
+          23,
+          42,
+          0.65
+        ); /* Lapisan gelap agar form tetap terbaca */
+      }
+
+      /* --- EFEK GLASSMORPHISM (KACA TRANSPARAN) PADA KOTAK UTAMA --- */
+      .wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        margin: 20px;
+        padding: 10px;
+
+        /* Background transparan dan efek blur (kaca) */
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+
+        /* Border tipis putih transparan agar terlihat elegan */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+
+      .form-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+      }
+
+      h2 {
+        font-size: 26px;
+        color: #ffffff; /* Ubah ke putih agar terbaca */
+        text-align: center;
+        margin-bottom: 6px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        text-align: center;
+        font-size: 13px;
+        color: #cbd5e1; /* Warna abu-abu terang */
+        margin-bottom: 25px;
+        font-weight: 500;
+      }
+
+      .alert-box {
+        display: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .alert-error {
+        background: rgba(254, 242, 242, 0.9);
+        color: #ef4444;
+        border: 1px solid #fecaca;
+      }
+
+      .alert-success {
+        background: rgba(240, 253, 244, 0.9);
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+      }
+
+      .input-group {
+        position: relative;
+        margin-bottom: 30px;
+      }
+
+      /* --- EFEK TRANSPARAN PADA KOLOM INPUT --- */
+      .input-group input {
+        width: 100%;
+        height: 52px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #ffffff; /* Teks inputan putih */
+        padding: 0 16px;
+
+        /* Background dan border inputan dibuat transparan */
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        outline: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .input-group input:focus {
+        border-color: #818cf8; /* Warna border saat aktif (biru terang) */
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.2);
+      }
+
+      .input-group label {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        transform: translateY(-50%);
+        font-size: 14px;
+        color: #cbd5e1; /* Label warna abu terang */
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0 4px;
+        border-radius: 4px;
+      }
+
+      .input-group input:focus ~ label,
+      .input-group input:valid ~ label {
+        top: -11px; /* Naikkan posisi ke atas garis border */
+        left: 14px;
+        font-size: 11px;
+        color: #818cf8;
+        background: rgba(
+          255,
+          255,
+          255,
+          0.05
+        ); /* Background gelap transparan agar menutupi garis border dengan rapi */
+        padding: 0 6px; /* Beri jarak di samping teks */
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      .remember {
+        margin-bottom: 28px;
+      }
+
+      .remember label {
+        font-size: 13px;
+        color: #e2e8f0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+        user-select: none;
+      }
+
+      .remember input {
+        accent-color: #4f46e5;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      button {
+        width: 100%;
+        height: 52px;
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        border-radius: 12px;
+        border: none;
+        outline: none;
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+        transition: all 0.3s ease;
+      }
+
+      button:hover {
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+      }
+
+      button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      @media (max-width: 480px) {
+        .form-wrapper {
+          padding: 30px 20px;
+        }
+
+        h2 {
+          font-size: 22px;
+        }
+
+        .input-group input,
+        button {
+          height: 46px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="video-container">
+      <video autoplay loop muted playsinline class="bg-video">
+        <source src="assets/video-login.mp4 " type="video/mp4" />
+      </video>
+      <div class="video-overlay"></div>
+    </div>
+
+    <div class="wrapper">
+      <div class="form-wrapper sign-in">
+        <form id="loginForm">
+          <h2>Sistem Informasi QC</h2>
+          <p class="subtitle">Tracking Web Dashboard</p>
+
+          <div id="alertBox" class="alert-box"></div>
+
+          <div class="input-group">
+            <input type="text" id="username" required autocomplete="off" />
+            <label for="username">Username</label>
+          </div>
+
+          <div class="input-group">
+            <input type="password" id="password" required autocomplete="off" />
+            <label for="password">Password</label>
+          </div>
+
+          <div class="remember">
+            <label><input type="checkbox" id="rememberMe" /> Ingat saya</label>
+          </div>
+
+          <button type="submit" id="btnSubmit">Masuk</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/login-database.js"></script>
+
+    <script>
+      const formLogin = document.getElementById("loginForm");
+      const alertBox = document.getElementById("alertBox");
+      const btnSubmit = document.getElementById("btnSubmit");
+
+      function showNotification(message, type) {
+        alertBox.style.display = "block";
+        alertBox.textContent = message;
+
+        if (type === "success") {
+          alertBox.className = "alert-box alert-success";
+        } else {
+          alertBox.className = "alert-box alert-error";
+        }
+      }
+
+      formLogin.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        alertBox.style.display = "none";
+
+        const inputUser = document.getElementById("username").value.trim();
+        const inputPass = document.getElementById("password").value.trim();
+
+        const user = registeredAccounts.find(
+          (acc) => acc.username === inputUser && acc.password === inputPass,
+        );
+
+        if (user) {
+          localStorage.setItem("active_user_role", user.role);
+          localStorage.setItem("loggedInUser", user.username);
+
+          showNotification("Berhasil masuk! Mengalihkan...", "success");
+
+          btnSubmit.innerHTML = "Memproses...";
+          btnSubmit.disabled = true;
+
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1200);
+        } else {
+          showNotification(
+            "Akses ditolak! Username atau password salah.",
+            "error",
+          );
+
+          document.getElementById("password").value = "";
+          document.getElementById("password").focus();
+        }
+      });
+    </script>
+  </body>
+</html>
