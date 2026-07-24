@@ -1,7 +1,6 @@
 // =========================================================================
 // 1. AMBIL DATA USER LOGIN DARI STORAGE
 // =========================================================================
-// Mengambil username yang disimpan saat proses login. Jika belum ada, tampilkan "Guest"
 const currentUser = localStorage.getItem("loggedInUser") || "Guest";
 
 // Fungsi untuk mengganti nama di layar (Dashboard Header)
@@ -9,44 +8,41 @@ function tampilkanNamaUser(username) {
   const elemenNama = document.getElementById("nama-user");
 
   if (elemenNama) {
-    // Membuat huruf pertama menjadi kapital agar lebih rapi
     const namaFormat = username.charAt(0).toUpperCase() + username.slice(1);
     elemenNama.innerText = namaFormat;
   }
 }
 
-// Menjalankan fungsi otomatis saat elemen HTML sudah selesai dimuat oleh browser
+// Menjalankan fungsi otomatis saat elemen HTML selesai dimuat
 document.addEventListener("DOMContentLoaded", () => {
   tampilkanNamaUser(currentUser);
-
-  // --- TAMBAHAN BARU: Langsung panggil isi tabel Tracking agar tidak kosong ---
   renderTabelTracking();
 });
 
 // =========================================================================
 // 2. MANAJEMEN TAB SIDEBAR
 // =========================================================================
-// Fungsi untuk mengatur pergantian Tab Menu di Sidebar
 function showTab(tabId) {
-  // 1. Sembunyikan semua konten tab
   const contents = document.querySelectorAll(".tab-content");
   contents.forEach((content) => {
     content.classList.remove("active");
   });
 
-  // 2. Hapus highlight 'active' dari semua menu sidebar
   const menuItems = document.querySelectorAll(".sidebar-menu li");
   menuItems.forEach((item) => {
     item.classList.remove("active");
   });
 
-  // 3. Tampilkan tab yang dipilih
-  document.getElementById(tabId).classList.add("active");
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add("active");
+  }
 
-  // 4. Tambahkan highlight pada menu yang di-klik
-  const activeMenu = Array.from(menuItems).find((item) =>
-    item.getAttribute("onclick").includes(tabId),
-  );
+  const activeMenu = Array.from(menuItems).find((item) => {
+    const onclickAttr = item.getAttribute("onclick");
+    return onclickAttr && onclickAttr.includes(tabId);
+  });
+  
   if (activeMenu) {
     activeMenu.classList.add("active");
   }
@@ -56,97 +52,137 @@ function showTab(tabId) {
 // 3. LOGIKA LOGOUT
 // =========================================================================
 function logoutUser() {
-  // Memunculkan pop-up konfirmasi
   const konfirmasi = confirm("Apakah Anda yakin ingin keluar?");
 
   if (konfirmasi) {
-    // Hapus data sesi/login dari memori browser
     localStorage.removeItem("loggedInUser");
     localStorage.removeItem("active_user_role");
-
-    // Arahkan kembali ke halaman login.
-    // (Ganti 'login.html' dengan nama file halaman login kamu yang sebenarnya)
     window.location.href = "index.html";
   }
 }
 
 // =========================================================================
-// 4. LOGIKA DATABASE SEMENTARA (CRUD SIMULASI)
+// 4. LOGIKA DATABASE SEMENTARA & CRUD
 // =========================================================================
 
-// Mengambil data yang sudah pernah disimpan dari localStorage browser
-// Jika masih kosong (baru pertama kali buka), buat array kosong []
+// Mengambil data dari localStorage browser
 let dbSistem = JSON.parse(localStorage.getItem("dataXTAL")) || [];
 
 // Fungsi untuk menyimpan data dari form Input Sistem Baru
 function simpanDataBaru() {
   const valProduct = document.getElementById("input-product").value;
   const valSN = document.getElementById("input-sn").value.trim();
+  const valStartDate = document.getElementById("input-date1") ? document.getElementById("input-date1").value : "-";
+  const valEndDate = document.getElementById("input-date2") ? document.getElementById("input-date2").value : "-";
 
-  // Validasi: Cegah simpan kalau inputan Serial Number (SN) kosong
+  // Validasi: Cek input kosong
   if (valSN === "") {
     alert("Peringatan: Serial Number harus diisi!");
     return;
   }
 
-  // Validasi: Cegah SN duplikat (tidak boleh ada SN yang sama)
+  // Validasi: Cek duplikat Serial Number
   const cekDuplikat = dbSistem.find((item) => item.sn === valSN);
   if (cekDuplikat) {
     alert(`Gagal! Serial Number ${valSN} sudah terdaftar di sistem.`);
     return;
   }
 
-  // Bungkus data baru yang akan disimpan
+  // Objek data baru
   const dataBaru = {
     product: valProduct,
     sn: valSN,
-    customer: "Belum Ada PO", // Default kosong
+    startDate: valStartDate,
+    endDate: valEndDate,
     progres: 0,
     status: "New",
   };
 
-  // Masukkan ke dalam array dan simpan secara permanen di memori browser (localStorage)
+  // Simpan ke array dan localStorage
   dbSistem.push(dataBaru);
   localStorage.setItem("dataXTAL", JSON.stringify(dbSistem));
 
   alert("Sukses! Data Sistem berhasil disimpan.");
 
-  // Reset / kosongkan inputan SN setelah berhasil disimpan
+  // Reset input form
   document.getElementById("input-sn").value = "";
+  if (document.getElementById("input-date1")) document.getElementById("input-date1").value = "";
+  if (document.getElementById("input-date2")) document.getElementById("input-date2").value = "";
 
-  // Langsung perbarui tampilan tabel dan otomatis pindah ke tab Tracking Overview
+  // Perbarui tabel dan arahkan ke tab tracking
   renderTabelTracking();
   showTab("tracking");
+}
+
+// Fungsi untuk menghapus data berdasarkan Serial Number (SN)
+function hapusData(sn) {
+  const konfirmasi = confirm(`Apakah Anda yakin ingin menghapus data dengan SN: ${sn}?`);
+  if (!konfirmasi) return;
+
+  // Filter array untuk membuang data yang memiliki SN yang sama
+  dbSistem = dbSistem.filter((item) => item.sn !== sn);
+
+  // Simpan kembali data terbaru ke localStorage
+  localStorage.setItem("dataXTAL", JSON.stringify(dbSistem));
+
+  alert("Data berhasil dihapus!");
+
+  // Perbarui tampilan tabel dan ringkasan
+  renderTabelTracking();
+}
+
+// Fungsi untuk memperbarui angka pada box ringkasan di bagian atas tracking
+function updateSummaryBoxes() {
+  const totalSistem = dbSistem.length;
+  const totalNT8 = dbSistem.filter(item => item.product === "NT8").length;
+  const totalFormulator = dbSistem.filter(item => item.product === "Formulator").length;
+  const totalQCSelesai = dbSistem.filter(item => item.progres === 100 || item.status === "Completed").length;
+  const totalShipment = dbSistem.filter(item => item.status === "Shipped").length;
+
+  const valueBoxes = document.querySelectorAll("#tracking .value-box p");
+  if (valueBoxes.length >= 5) {
+    valueBoxes[0].innerText = totalSistem;
+    valueBoxes[1].innerText = totalNT8;
+    valueBoxes[2].innerText = totalFormulator;
+    valueBoxes[3].innerText = totalQCSelesai;
+    valueBoxes[4].innerText = totalShipment;
+  }
 }
 
 // Fungsi untuk menampilkan (me-render) isi data ke dalam Tabel Tracking Overview
 function renderTabelTracking() {
   const tbody = document.getElementById("tabel-tracking");
+  if (!tbody) return; 
 
-  // Bersihkan isi tabel sebelum diisi ulang agar datanya tidak berlipat ganda
-  if (!tbody) return; // Mencegah error jika elemen tidak ditemukan
   tbody.innerHTML = "";
 
-  // Jika belum ada data sama sekali di dalam dbSistem
+  // Jika data kosong
   if (dbSistem.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 20px;">Data kosong. Silakan Input Sistem Baru.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">Data kosong. Silakan Input Sistem Baru.</td></tr>`;
+    updateSummaryBoxes();
     return;
   }
 
-  // Looping / putar data dan cetak baris HTML untuk setiap datanya
+  // Looping data ke baris tabel
   dbSistem.forEach((item) => {
     const tr = document.createElement("tr");
-
-    // Buat warna badge status (Hijau jika progres 100%, Biru jika belum)
     let statusWarna = item.progres === 100 ? "#10b981" : "#3b82f6";
 
     tr.innerHTML = `
-            <td style="font-weight: 600;">${item.product}</td>
-            <td>${item.sn}</td>
-            <td style="color: #64748b;">${item.customer}</td>
-            <td><strong>${item.progres}%</strong></td>
-            <td><span style="background-color: ${statusWarna}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">${item.status}</span></td>
-        `;
+      <td style="font-weight: 600;">${item.product}</td>
+      <td>${item.sn}</td>
+      <td style="color: #64748b;">${item.startDate} s/d ${item.endDate}</td>
+      <td><strong>${item.progres}%</strong></td>
+      <td><span style="background-color: ${statusWarna}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">${item.status}</span></td>
+      <td>
+        <button onclick="hapusData('${item.sn}')" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+          <i class="fas fa-trash"></i> Hapus
+        </button>
+      </td>
+    `;
     tbody.appendChild(tr);
   });
+
+  // Update angka ringkasan
+  updateSummaryBoxes();
 }
