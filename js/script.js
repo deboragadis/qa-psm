@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // =========================================================================
-// 2. MANAJEMEN TAB SIDEBAR
+// 2. MANAJEMEN TAB SIDEBAR & TOGGLE RESPONSIF
 // =========================================================================
 window.showTab = function(tabId) {
   const contents = document.querySelectorAll(".tab-content");
@@ -65,6 +65,26 @@ window.showTab = function(tabId) {
   
   if (activeMenu) {
     activeMenu.classList.add("active");
+  }
+
+  // KHUSUS HP: Otomatis tutup sidebar setelah menu diklik agar tidak menutupi layar
+  if (window.innerWidth <= 768) {
+    const sidebar = document.querySelector(".sidebar");
+    if (sidebar) {
+      sidebar.classList.remove("mobile-show");
+    }
+  }
+};
+
+// Fungsi Toggle Sidebar untuk Desktop & HP
+window.toggleSidebar = function() {
+  const sidebar = document.querySelector(".sidebar");
+  if (window.innerWidth <= 768) {
+    // Di HP, gunakan animasi drawer melayang (mobile-show)
+    sidebar.classList.toggle("mobile-show");
+  } else {
+    // Di Desktop, gunakan geser sembunyi biasa
+    sidebar.classList.toggle("sembunyi");
   }
 };
 
@@ -329,12 +349,10 @@ window.importFromCSV = async function(event) {
     
     let successCount = 0;
     
-    // Mulai dari baris 1 (karena baris 0 adalah Header kolom)
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
 
-      // Memecah kolom CSV dengan aman
       const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.replace(/^"|"$/g, '').trim());
       
       if (cols.length >= 2) {
@@ -361,8 +379,8 @@ window.importFromCSV = async function(event) {
     }
 
     alert(`Import selesai! Berhasil menambahkan ${successCount} data ke Cloud.`);
-    event.target.value = ""; // Reset input file
-    window.renderTabelTracking(); // Refresh tampilan tabel & chart
+    event.target.value = ""; 
+    window.renderTabelTracking(); 
   };
   
   reader.readAsText(file);
