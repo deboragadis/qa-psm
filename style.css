@@ -40,13 +40,12 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  /* INI YANG BERUBAH: Efek transisi smooth seperti digeser */
   transition:
     margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1),
     opacity 0.4s ease;
 }
 
-/* Class untuk menyembunyikan sidebar dengan animasi geser */
+/* Class untuk menyembunyikan sidebar dengan animasi geser (Desktop) */
 .sidebar.sembunyi {
   margin-left: -280px;
   opacity: 0;
@@ -100,7 +99,6 @@ body {
   padding: 30px;
   overflow-y: auto;
   background-color: #f8fafc;
-  /* INI YANG BERUBAH: Lebar konten utama ikut menyesuaikan pergerakan sidebar dengan smooth */
   transition:
     margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1),
     width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
@@ -223,7 +221,7 @@ button {
   padding: 10px 15px;
   border: none;
   cursor: pointer;
-  width: 100%;
+  width: auto;
   transition: 0.2s;
 }
 
@@ -235,6 +233,7 @@ button:hover {
 .btn-danger {
   background-color: #ef4444;
   color: white;
+  width: 100%;
 }
 .btn-primary {
   background-color: #3b82f6;
@@ -285,17 +284,27 @@ button:hover {
 /* MEDIA QUERIES (RESPONSIVE UNTUK HP/TABLET)*/
 /* ========================================= */
 @media (max-width: 768px) {
-  /* Sidebar melayang di atas konten saat di layar HP */
+  /* Sidebar di HP menjadi melayang (fixed) dan tersembunyi secara default */
   .sidebar {
-    position: absolute;
-    height: 100%;
-    z-index: 999;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    margin-left: -280px;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Class untuk memunculkan sidebar saat tombol hamburger diklik di HP */
+  .sidebar.mobile-show {
+    margin-left: 0;
+    opacity: 1;
   }
 
   /* Ubah padding utama agar tidak terlalu sempit di layar kecil */
   .content-wrapper {
     padding: 20px 15px;
+    margin-left: 0 !important;
   }
 
   /* Kecilkan ukuran teks judul */
@@ -317,5 +326,12 @@ button:hover {
   /* Agar tabel tidak berantakan, buat area card-body bisa di-scroll ke kanan/kiri */
   .card-body {
     overflow-x: auto;
+  }
+
+  /* Penyesuaian header card agar tombol export/import rapi di HP */
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
   }
 }
