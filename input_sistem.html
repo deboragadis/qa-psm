@@ -79,7 +79,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                   <div>
                     <label style="font-weight: 600; color: #475569; font-size: 13px;">Produk *</label>
-                    <select id="input-product" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    <select id="input-product" onchange="updateOptionalOptions()" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;">
                       <option value="NT8">NT8</option>
                       <option value="Formulator">Formulator</option>
                       <option value="RI360">RI360</option>
@@ -94,10 +94,7 @@
                 <div style="margin-bottom: 15px;">
                   <label style="font-weight: 600; color: #475569; font-size: 13px;">Optional Sistem</label>
                   <select id="input-optional" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                    <option value="LV ONLY">LV ONLY</option>
-                    <option value="LV+LCP">LV+LCP</option>
-                    <option value="LV">LV</option>
-                    <option value="LCP">LCP</option>
+                    <!-- Opsi akan diatur secara dinamis oleh JavaScript berdasarkan produk yang dipilih -->
                   </select>
                 </div>
 
