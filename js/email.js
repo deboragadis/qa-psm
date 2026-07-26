@@ -6,6 +6,7 @@ import { tampilkanNamaUser } from "./common.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 let dbSistem = [];
+let textForMailto = ""; // Variabel penyimpan versi teks biasa untuk mailto
 
 async function fetchAllData() {
   try {
@@ -25,7 +26,8 @@ function generatePreview() {
   if (!previewDiv) return;
 
   if (dbSistem.length === 0) {
-    previewDiv.innerText = "Tidak ada data sistem yang tersedia untuk dibuat resumenya.";
+    previewDiv.innerHTML = "<p>Tidak ada data sistem yang tersedia untuk dibuat resumenya.</p>";
+    textForMailto = "Tidak ada data sistem yang tersedia untuk dibuat resumenya.";
     return;
   }
 
@@ -34,17 +36,51 @@ function generatePreview() {
   const totalFormulator = dbSistem.filter(item => item.product === "Formulator").length;
   const totalSelesai = dbSistem.filter(item => item.progres === 100 || item.status === "Completed").length;
   const totalShipment = dbSistem.filter(item => item.status === "Shipped").length;
+  const tanggalLaporan = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  let resumeText = `=== LAPORAN RESUME PROGRES QC INSTRUMENT (SITRAQ) ===\n`;
-  resumeText += `Tanggal Laporan: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\n`;
-  resumeText += `--- RINGKASAN STOK & PROGRES ---\n`;
-  resumeText += `• Total Sistem Terdaftar: ${dbSistem.length}\n`;
-  resumeText += `• RI360 / Rock Imager: ${totalRI}\n`;
-  resumeText += `• NT8: ${totalNT8}\n`;
-  resumeText += `• Formulator: ${totalFormulator}\n`;
-  resumeText += `• QC Selesai (100%): ${totalSelesai}\n`;
-  resumeText += `• Shipped: ${totalShipment}\n\n`;
-  resumeText += `--- DETAIL DAFTAR SISTEM & PROGRES ---\n`;
+  // === 1. BUAT VERSI HTML (TABEL) UNTUK PREVIEW DI UI ===
+  let htmlContent = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <h3 style="text-align: center; color: #3b82f6; margin-bottom: 5px;">LAPORAN RESUME PROGRES QC INSTRUMENT (SITRAQ)</h3>
+      <p style="text-align: center; margin-top: 0; font-size: 14px;"><strong>Tanggal Laporan:</strong> ${tanggalLaporan}</p>
+
+      <h4 style="margin-bottom: 8px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px;">RINGKASAN STOK & PROGRES</h4>
+      <ul style="margin-top: 0; font-size: 14px; line-height: 1.6;">
+        <li>Total Sistem Terdaftar: <strong>${dbSistem.length}</strong></li>
+        <li>RI360 / Rock Imager: <strong>${totalRI}</strong></li>
+        <li>NT8: <strong>${totalNT8}</strong></li>
+        <li>Formulator: <strong>${totalFormulator}</strong></li>
+        <li>QC Selesai (100%): <strong>${totalSelesai}</strong></li>
+        <li>Shipped: <strong>${totalShipment}</strong></li>
+      </ul>
+
+      <h4 style="margin-bottom: 8px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px;">DETAIL DAFTAR SISTEM & PROGRES</h4>
+      <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; border-color: #cbd5e1;">
+        <thead style="background-color: #f1f5f9; color: #334155;">
+          <tr>
+            <th>No</th>
+            <th>Product</th>
+            <th>SN</th>
+            <th>Optional</th>
+            <th>Progres</th>
+            <th>Notes</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  // === 2. BUAT VERSI TEKS BIASA UNTUK TOMBOL MAILTO (FALLBACK) ===
+  textForMailto = `=== LAPORAN RESUME PROGRES QC INSTRUMENT (SITRAQ) ===\n`;
+  textForMailto += `Tanggal Laporan: ${tanggalLaporan}\n\n`;
+  textForMailto += `--- RINGKASAN STOK & PROGRES ---\n`;
+  textForMailto += `• Total Sistem Terdaftar: ${dbSistem.length}\n`;
+  textForMailto += `• RI360 / Rock Imager: ${totalRI}\n`;
+  textForMailto += `• NT8: ${totalNT8}\n`;
+  textForMailto += `• Formulator: ${totalFormulator}\n`;
+  textForMailto += `• QC Selesai (100%): ${totalSelesai}\n`;
+  textForMailto += `• Shipped: ${totalShipment}\n\n`;
+  textForMailto += `--- DETAIL DAFTAR SISTEM & PROGRES ---\n`;
 
   dbSistem.forEach((item, index) => {
     let catatanNote = "-";
@@ -55,32 +91,78 @@ function generatePreview() {
         catatanNote = aktif[aktif.length - 1].replace(/_/g, " ");
       }
     }
-    resumeText += `${index + 1}. [${item.product}] SN: ${item.sn} | Optional: ${item.optional || '-'} | Progres: ${item.progres}% (${catatanNote}) | Status: ${item.status}\n`;
+
+    // Tambah row tabel ke HTML
+    htmlContent += `
+      <tr>
+        <td>${index + 1}</td>
+        <td><strong>${item.product}</strong></td>
+        <td>${item.sn}</td>
+        <td>${item.optional || '-'}</td>
+        <td style="color: #2563eb; font-weight: bold;">${item.progres}%</td>
+        <td>${catatanNote}</td>
+        <td>${item.status}</td>
+      </tr>
+    `;
+
+    // Tambah baris ke versi teks biasa
+    textForMailto += `${index + 1}. [${item.product}] SN: ${item.sn} | Optional: ${item.optional || '-'} | Progres: ${item.progres}% (${catatanNote}) | Status: ${item.status}\n`;
   });
 
-  previewDiv.innerText = resumeText;
+  htmlContent += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  // Tampilkan format HTML (tabel) ke dalam tag div preview
+  previewDiv.innerHTML = htmlContent;
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  tampilkanNamaUser();
-  await fetchAllData();
-});
-
+// Fungsi kirim email via mailto (Tetap menggunakan variabel textForMailto)
 window.kirimEmailReport = function() {
   const emailTo = document.getElementById("email-to").value;
   const subject = document.getElementById("email-subject").value;
-  const previewDiv = document.getElementById("email-preview-content");
 
   if (!emailTo) {
     alert("Email tujuan wajib diisi!");
     return;
   }
 
-  const bodyText = previewDiv ? previewDiv.innerText : "";
-  const mailtoUrl = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-
+  const mailtoUrl = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(textForMailto)}`;
   window.location.href = mailtoUrl;
 };
+
+// =========================================================================
+// FUNGSI BARU: SALIN TABEL HTML UNTUK DI-PASTE KE GMAIL/OUTLOOK
+// =========================================================================
+window.salinTabelKeClipboard = function() {
+  const previewDiv = document.getElementById("email-preview-content");
+  if (!previewDiv) return;
+
+  // Membuat selection range khusus pada isi div preview
+  const range = document.createRange();
+  range.selectNodeContents(previewDiv);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  try {
+    document.execCommand('copy');
+    alert("Tabel berhasil disalin! Silakan buka aplikasi Email Anda (Gmail/Outlook) lalu tekan Paste (Ctrl+V).");
+  } catch (err) {
+    console.error("Gagal menyalin:", err);
+    alert("Gagal menyalin tabel.");
+  }
+  
+  // Bersihkan highlight seleksi
+  selection.removeAllRanges();
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+  tampilkanNamaUser();
+  await fetchAllData();
+});
 
 window.toggleSidebar = function() {
   const sidebar = document.querySelector(".sidebar");
