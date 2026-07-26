@@ -161,14 +161,16 @@ window.muatDetailUpdate = function() {
     const showLCP = optionalVal.includes("LCP");
     const showPC = optionalVal.includes("PC");
 
-    const qc1Items = ["General Check", "Mechanichal Movement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
-    if (showLCP) qc1Items.push("LCP Check");
-    if (showPC) qc1Items.push("PC Check");
+    // DIBENAHI: Menambahkan '1st' agar key-nya unik
+    const qc1Items = ["General Check", "Mechanical Movement 1st", "Dead Volume 1st", "Contamination 1st", "CV 1st", "Sitting Drop 1st", "Hanging Drop 1st"];
+    if (showLCP) qc1Items.push("LCP Check 1st");
+    if (showPC) qc1Items.push("PC Check 1st");
     qc1Items.push("Lifetime Test");
 
-    const qc2Items = ["Mechanical Movement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
-    if (showLCP) qc2Items.push("LCP Check");
-    if (showPC) qc2Items.push("PC Check");
+    // DIBENAHI: Menambahkan '2nd' agar tidak menimpa QC 1
+    const qc2Items = ["Mechanical Movement 2nd", "Dead Volume 2nd", "Contamination 2nd", "CV 2nd", "Sitting Drop 2nd", "Hanging Drop 2nd"];
+    if (showLCP) qc2Items.push("LCP Check 2nd");
+    if (showPC) qc2Items.push("PC Check 2nd");
 
     const postQaItems = ["Final QA", "Post QA", "Packing", "Shipping"];
     activeItemsList = [...qc1Items, ...qc2Items, ...postQaItems];
@@ -223,7 +225,7 @@ window.muatDetailUpdate = function() {
     html += `</div></div>`;
   }
 
-  // Simpan total item standar produk ini agar persentase stabil
+  // Simpan total item standar produk ini agar persentase stabil (tidak berubah-ubah berdasar DOM saat diload)
   currentProductTotalItems = activeItemsList.length;
 
   if (container) {
@@ -232,7 +234,7 @@ window.muatDetailUpdate = function() {
   hitungProgresOtomatis();
 };
 
-// Hitung persentase progres secara akurat dan konsisten
+// Hitung persentase progres secara otomatis & kelola aktifnya End Date QC berdasarkan "Final QA"
 window.hitungProgresOtomatis = function() {
   const checkboxes = document.querySelectorAll(".qc-checkbox");
   if (checkboxes.length === 0) return;
@@ -249,7 +251,7 @@ window.hitungProgresOtomatis = function() {
     }
   });
 
-  // Gunakan total item standar produk yang sedang dimuat, hindari pembagian dinamis yang berubah
+  // Gunakan total item yang dipatenkan di atas, bukan panjang DOM yang dinamis
   let totalDivisor = currentProductTotalItems > 0 ? currentProductTotalItems : checkboxes.length;
   let percentage = Math.round((checkedCount / totalDivisor) * 100);
   if (percentage > 100) percentage = 100;
@@ -281,7 +283,7 @@ window.hitungProgresOtomatis = function() {
   }
 };
 
-// Simpan perubahan progres ke Cloud Firestore
+// Simpan perubahan progres, logistik PO, dan End Date QC ke Cloud Firestore
 window.simpanUpdateProgres = async function() {
   const selectedSN = document.getElementById("update-sn").value;
   const newProgres = Number(document.getElementById("update-progres") ? document.getElementById("update-progres").value : 0);
@@ -321,6 +323,7 @@ window.simpanUpdateProgres = async function() {
     checklistData[key] = cb.checked;
   });
 
+  // Logika Status baru
   let newStatus = "In Progress";
   if (allChecked) {
     newStatus = "Shipped";
