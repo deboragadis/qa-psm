@@ -26,7 +26,8 @@ window.updateOptionalOptions = function() {
   const selectOptional = document.getElementById("input-optional");
   if (!selectOptional) return;
 
-  selectOptional.innerHTML = "";
+  // Set placeholder awal
+  selectOptional.innerHTML = `<option value="" disabled selected>Choose Optional Sistem</option>`;
 
   if (product === "Formulator") {
     const capacities = ["10 SP", "16 SP", "34 SP"];
@@ -145,6 +146,12 @@ window.simpanDataBaru = async function() {
 
   if (sn === "") {
     alert("Peringatan: Serial Number harus diisi!");
+    return;
+  }
+
+  // Validasi jika optional belum dipilih / masih berupa placeholder
+  if (!optional) {
+    alert("Peringatan: Silakan pilih Optional Sistem terlebih dahulu!");
     return;
   }
 
