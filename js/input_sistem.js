@@ -29,11 +29,17 @@ window.updateOptionalOptions = function() {
   selectOptional.innerHTML = "";
 
   if (product === "Formulator") {
-    ["10 SP", "16 SP", "34 SP"].forEach(opt => {
-      const el = document.createElement("option");
-      el.value = opt;
-      el.textContent = opt;
-      selectOptional.appendChild(el);
+    const capacities = ["10 SP", "16 SP", "34 SP"];
+    const variants = ["Only", "Pumpbox"];
+    
+    capacities.forEach(cap => {
+      variants.forEach(variant => {
+        const textOpt = `${cap} ${variant}`;
+        const el = document.createElement("option");
+        el.value = textOpt;
+        el.textContent = textOpt;
+        selectOptional.appendChild(el);
+      });
     });
   } else if (product === "NT8") {
     ["LV ONLY", "LV+LCP", "LV", "LCP"].forEach(opt => {
@@ -42,13 +48,18 @@ window.updateOptionalOptions = function() {
       el.textContent = opt;
       selectOptional.appendChild(el);
     });
-  } else {
-    // Untuk RI360 atau produk lainnya
-    ["Standard", "Custom"].forEach(opt => {
-      const el = document.createElement("option");
-      el.value = opt;
-      el.textContent = opt;
-      selectOptional.appendChild(el);
+  } else if (product === "RI360") {
+    const optics = ["Visible", "UV", "SLP", "MFI", "UVA"];
+    const variants = ["Only", "Chiller", "Peltier"];
+    
+    optics.forEach(optic => {
+      variants.forEach(variant => {
+        const textOpt = `${optic} ${variant}`;
+        const el = document.createElement("option");
+        el.value = textOpt;
+        el.textContent = textOpt;
+        selectOptional.appendChild(el);
+      });
     });
   }
 };
