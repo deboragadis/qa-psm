@@ -76,64 +76,55 @@
         <!-- Section Update Progres QC -->
         <section class="tab-content active">
           <div class="card">
-            <div class="card-header">📈 Update Progres QC Sistem</div>
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Update Detail QC Checklist & Data Logistik</span>
+              <i class="fas fa-minus" style="cursor: pointer;"></i>
+            </div>
             <div class="card-body">
-              <p class="subtitle">
-                Pilih Serial Number unit yang ingin diperbarui progres dan status QC-nya:
-              </p>
-
+              
+              <!-- Pilih Sistem -->
               <div style="margin-bottom: 15px">
-                <label style="font-weight: 600; color: #475569">Pilih Serial Number (SN) *</label>
+                <label style="font-weight: 600; color: #475569; font-size: 13px;">Pilih Sistem untuk Diupdate:</label>
                 <select
                   id="update-sn"
-                  onchange="isiOtomatisUpdate()"
-                  style="
-                    width: 100%;
-                    padding: 10px;
-                    margin-top: 8px;
-                    border-radius: 8px;
-                    border: 1px solid #cbd5e1;
-                  "
+                  onchange="muatDetailUpdate()"
+                  style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;"
                 >
-                  <option value="">-- Pilih SN Sistem --</option>
+                  <option value="">-- Pilih Serial Number --</option>
                 </select>
               </div>
 
-              <div style="margin-bottom: 15px">
-                <label style="font-weight: 600; color: #475569">Progres (%) *</label>
+              <!-- Customer & Nomor PO (Sejajar) -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                  <label style="font-weight: 600; color: #475569; font-size: 13px;">Nama Customer / Pembeli</label>
+                  <input type="text" id="update-customer" readonly style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
+                </div>
+                <div>
+                  <label style="font-weight: 600; color: #475569; font-size: 13px;">Nomor PO</label>
+                  <input type="text" id="update-po" readonly style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
+                </div>
+              </div>
+
+              <!-- Update End Date QC -->
+              <div style="margin-bottom: 25px">
+                <label style="font-weight: 600; color: #475569; font-size: 13px;">Update End Date QC</label>
                 <input
-                  type="number"
-                  id="update-progres"
-                  min="0"
-                  max="100"
-                  placeholder="Masukkan angka 0 - 100..."
-                  style="
-                    width: 100%;
-                    padding: 10px;
-                    margin-top: 8px;
-                    border-radius: 8px;
-                    border: 1px solid #cbd5e1;
-                  "
+                  type="date"
+                  id="update-end-date"
+                  style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;"
                 />
               </div>
 
-              <div style="margin-bottom: 15px">
-                <label style="font-weight: 600; color: #475569">Status QC *</label>
-                <select
-                  id="update-status"
-                  style="
-                    width: 100%;
-                    padding: 10px;
-                    margin-top: 8px;
-                    border-radius: 8px;
-                    border: 1px solid #cbd5e1;
-                  "
-                >
-                  <option value="New">New</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Shipped">Shipped</option>
-                </select>
+              <!-- Area Checklist Dinamis -->
+              <div id="checklist-container" style="border-top: 1px solid #e2e8f0; paddingTop: 15px; margin-bottom: 20px;">
+                <p style="color: #64748b; font-style: italic;">Silakan pilih Serial Number terlebih dahulu untuk memuat checklist.</p>
+              </div>
+
+              <!-- Informasi Progres Saat Ini -->
+              <div style="margin-bottom: 20px; font-weight: 600; color: #1e293b;">
+                Progres Otomatis: <span id="label-progres" style="color: #3b82f6;">0%</span>
+                <input type="hidden" id="update-progres" value="0">
               </div>
 
               <button
@@ -141,7 +132,7 @@
                 onclick="simpanUpdateProgres()"
                 style="width: auto"
               >
-                <i class="fas fa-check"></i> Simpan Pembaruan
+                <i class="fas fa-check"></i> Update Progres
               </button>
             </div>
           </div>
