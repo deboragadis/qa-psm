@@ -98,33 +98,7 @@
                   </select>
                 </div>
 
-                <div>
-                  <label style="font-weight: 600; color: #475569; font-size: 13px;">Customer</label>
-                  <input type="text" id="input-customer" value="Belum ada PO" disabled style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
-                </div>
-              </div>
-
-              <!-- SECTION 2: LOGISTIK & JADWAL -->
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; color: #1e293b;">
-                  <i class="fas fa-calendar-alt" style="color: #3b82f6;"></i> Logistik & Jadwal
-                </h3>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                  <div>
-                    <label style="font-weight: 600; color: #475569; font-size: 13px;">Status PO</label>
-                    <select id="input-status-po" onchange="toggleStatusPO()" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                      <option value="Belum ada PO">Belum ada PO</option>
-                      <option value="Ada PO">Ada PO</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style="font-weight: 600; color: #475569; font-size: 13px;">Nomor PO</label>
-                    <input type="text" id="input-po" value="Belum ada PO" disabled style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
-                  </div>
-                </div>
-
-                <div style="margin-bottom: 15px;">
+                 <div style="margin-bottom: 15px;">
                   <label style="font-weight: 600; color: #475569; font-size: 13px;">PIC QC</label>
                   <select id="input-pic" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;">
                     <option value="Arifal">Arifal</option>
@@ -138,19 +112,11 @@
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                  <div>
-                    <label style="font-weight: 600; color: #475569; font-size: 13px;">Plan Shipped</label>
-                    <input type="date" id="input-plan-shipped" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;" />
-                  </div>
-                  <div>
+                    <div>
                     <label style="font-weight: 600; color: #475569; font-size: 13px;">Start Date QC</label>
                     <input type="date" id="input-date1" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;" />
                   </div>
-                  <div>
-                    <label style="font-weight: 600; color: #475569; font-size: 13px;">End Date QC (Progress 100%)</label>
-                    <input type="date" id="input-date2" disabled title="End Date hanya aktif jika progres 100%" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b; cursor: not-allowed;" />
                   </div>
-                </div>
               </div>
 
               <button class="btn-primary" onclick="simpanDataBaru()" style="width: auto;">
