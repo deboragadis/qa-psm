@@ -112,7 +112,6 @@ window.muatDetailUpdate = function() {
     return;
   }
 
-  // Set Status PO dari data tersimpan
   const statusPoVal = targetItem.statusPo || (targetItem.po && targetItem.po !== "Belum ada PO" ? "Ada PO" : "Belum ada PO");
   document.getElementById("input-status-po").value = statusPoVal;
   toggleStatusPO();
@@ -224,16 +223,24 @@ window.muatDetailUpdate = function() {
   hitungProgresOtomatis();
 };
 
-// Hitung persentase progres secara otomatis & kelola aktifnya End Date QC (100%)
+// Hitung persentase progres secara otomatis & kelola aktifnya End Date QC berdasarkan "Final QA"
 window.hitungProgresOtomatis = function() {
   const checkboxes = document.querySelectorAll(".qc-checkbox");
   if (checkboxes.length === 0) return;
 
   let totalCheck = checkboxes.length;
   let checkedCount = 0;
+  let isFinalQAChecked = false;
+  let isAllChecked = true;
 
   checkboxes.forEach(cb => {
     if (cb.checked) checkedCount++;
+    else isAllChecked = false;
+
+    let key = cb.getAttribute("data-key");
+    if (key === "Final QA" && cb.checked) {
+      isFinalQAChecked = true;
+    }
   });
 
   let percentage = Math.round((checkedCount / totalCheck) * 100);
@@ -245,8 +252,9 @@ window.hitungProgresOtomatis = function() {
   if (inputProgres) inputProgres.value = percentage;
   if (labelProgres) labelProgres.innerText = percentage + "%";
 
+  // End Date QC aktif apabila checkbox "Final QA" sudah tercentang
   if (inputDate2) {
-    if (percentage === 100) {
+    if (isFinalQAChecked) {
       inputDate2.disabled = false;
       inputDate2.style.backgroundColor = "#ffffff";
       inputDate2.style.color = "#000000";
@@ -272,7 +280,20 @@ window.simpanUpdateProgres = async function() {
   const customerVal = statusPoVal === "Belum ada PO" ? "Belum ada PO" : (document.getElementById("update-customer").value.trim() || "-");
   const poVal = statusPoVal === "Belum ada PO" ? "Belum ada PO" : (document.getElementById("update-po").value.trim() || "-");
   const planShippedVal = statusPoVal === "Belum ada PO" ? "-" : (document.getElementById("input-plan-shipped").value || "-");
-  const endDateVal = newProgres === 100 ? (document.getElementById("input-date2").value || "-") : "-";
+  
+  let finalQAChecked = false;
+  let allChecked = true;
+  const checkboxes = document.querySelectorAll(".qc-checkbox");
+  checkboxes.forEach(cb => {
+    if (cb.getAttribute("data-key") === "Final QA" && cb.checked) {
+      finalQAChecked = true;
+    }
+    if (!cb.checked) {
+      allChecked = false;
+    }
+  });
+
+  const endDateVal = finalQAChecked ? (document.getElementById("input-date2").value || "-") : "-";
 
   if (!selectedSN) {
     alert("Peringatan: Silakan pilih Serial Number terlebih dahulu!");
@@ -286,14 +307,18 @@ window.simpanUpdateProgres = async function() {
   }
 
   let checklistData = {};
-  const checkboxes = document.querySelectorAll(".qc-checkbox");
   checkboxes.forEach(cb => {
     let key = cb.getAttribute("data-key");
     checklistData[key] = cb.checked;
   });
 
+  // Logika Status: 
+  // Jika semua checklist tercentang (allChecked), status menjadi "Shipped" (sehingga QC Selesai di dashboard box menjadi 0 dan Shipment bertambah)
+  // Jika Final QA tercentang tetapi belum semua, status "Completed" (QC Selesai bertambah 1)
   let newStatus = "In Progress";
-  if (newProgres === 100) {
+  if (allChecked) {
+    newStatus = "Shipped";
+  } else if (finalQAChecked || newProgres === 100) {
     newStatus = "Completed";
   } else if (newProgres === 0) {
     newStatus = "New";
@@ -312,7 +337,7 @@ window.simpanUpdateProgres = async function() {
       checklist: checklistData
     });
 
-    alert(`Sukses! Progres untuk SN ${selectedSN} berhasil diperbarui menjadi ${newProgres}%.`);
+    alert(`Sukses! Progres untuk SN ${selectedSN} berhasil diperbarui.`);
     window.location.href = "dashboard.html";
   } catch (error) {
     console.error("Gagal mengupdate progres:", error);
