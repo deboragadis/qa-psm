@@ -94,30 +94,36 @@
                 </select>
               </div>
 
-              <!-- Customer & Nomor PO (Sejajar) -->
+              <!-- Logistik & PO (Grid Sejajar) -->
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                 <div>
-                  <label style="font-weight: 600; color: #475569; font-size: 13px;">Nama Customer / Pembeli</label>
-                  <input type="text" id="update-customer" readonly style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
+                  <label style="font-weight: 600; color: #475569; font-size: 13px;">Status PO</label>
+                  <select id="input-status-po" onchange="toggleStatusPO()" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    <option value="Belum ada PO">Belum ada PO</option>
+                    <option value="Ada PO">Ada PO</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-weight: 600; color: #475569; font-size: 13px;">Nama Customer</label>
+                  <input type="text" id="update-customer" disabled style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
                 </div>
                 <div>
                   <label style="font-weight: 600; color: #475569; font-size: 13px;">Nomor PO</label>
-                  <input type="text" id="update-po" readonly style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
+                  <input type="text" id="update-po" disabled style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b;" />
+                </div>
+                <div>
+                  <label style="font-weight: 600; color: #475569; font-size: 13px;">Plan Shipped</label>
+                  <input type="date" id="input-plan-shipped" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;" />
                 </div>
               </div>
 
-              <!-- Update End Date QC -->
-              <div style="margin-bottom: 25px">
-                <label style="font-weight: 600; color: #475569; font-size: 13px;">Update End Date QC</label>
-                <input
-                  type="date"
-                  id="update-end-date"
-                  style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1;"
-                />
+              <div style="margin-bottom: 15px;">
+                <label style="font-weight: 600; color: #475569; font-size: 13px;">End Date QC (Progress 100%)</label>
+                <input type="date" id="input-date2" disabled title="End Date hanya aktif jika progres 100%" style="width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #64748b; cursor: not-allowed;" />
               </div>
 
               <!-- Area Checklist Dinamis -->
-              <div id="checklist-container" style="border-top: 1px solid #e2e8f0; paddingTop: 15px; margin-bottom: 20px;">
+              <div id="checklist-container" style="border-top: 1px solid #e2e8f0; padding-top: 15px; margin-bottom: 20px;">
                 <p style="color: #64748b; font-style: italic;">Silakan pilih Serial Number terlebih dahulu untuk memuat checklist.</p>
               </div>
 
