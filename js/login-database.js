@@ -2,7 +2,7 @@
 
 const registeredAccounts = [
   // Format: { username: "nama", password: "password", role: "hak_akses" }
-  { username: "admin", password: "adminkeren123", role: "superadmin" },
+  { username: "gadis", password: "adminkeren123", role: "superadmin" },
   { username: "andi", password: "0000", role: "manager" },
   { username: "ari", password: "0000", role: "manager" },
   { username: "taufan", password: "0000", role: "manager" },
