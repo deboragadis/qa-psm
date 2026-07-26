@@ -1,11 +1,15 @@
+// =========================================================================
+// INISIALISASI FIREBASE & RENDER DASHBOARD TRACKING OVERVIEW
+// =========================================================================
 import { db, COLLECTION_NAME } from "./firebase.js";
 import { tampilkanNamaUser } from "./common.js";
-import { collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 let dbSistem = [];
 let barChartInstance = null;
 let donutChartInstance = null;
 
+// Tarik data dari Cloud Firestore
 async function fetchAllData() {
   try {
     const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
@@ -22,6 +26,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   tampilkanNamaUser();
   await window.renderTabelTracking();
 });
+
+// Fungsi untuk mendeteksi tahapan spesifik checklist terakhir yang aktif dicentang
+function getTahapanSpesifik(item) {
+  if (!item.checklist || Object.keys(item.checklist).length === 0) {
+    return item.progres === 100 ? "Selesai (100%)" : `${item.progres}% (New / Belum mulai)`;
+  }
+
+  let keys = Object.keys(item.checklist);
+  let checklistAktif = keys.filter(k => item.checklist[k] === true);
+
+  if (checklistAktif.length === 0) {
+    return `${item.progres}% (Belum ada tahapan)`;
+  }
+
+  // Ambil tahapan aktif terakhir
+  let tahapanTerakhir = checklistAktif[checklistAktif.length - 1].replace(/_/g, " ");
+  return `${item.progres}% (${tahapanTerakhir})`;
+}
 
 window.simpanDataBaru = async function() {
   const valProduct = document.getElementById("input-product").value;
@@ -75,7 +97,7 @@ window.hapusData = async function(docId, sn) {
 };
 
 function updateSummaryBoxes() {
-  const totalRI = dbSistem.filter(item => item.product === "Rock Imager").length;
+  const totalRI = dbSistem.filter(item => item.product === "RI360" || item.product === "Rock Imager").length;
   const totalNT8 = dbSistem.filter(item => item.product === "NT8").length;
   const totalFormulator = dbSistem.filter(item => item.product === "Formulator").length;
   const totalQCSelesai = dbSistem.filter(item => item.progres === 100 || item.status === "Completed").length;
@@ -94,7 +116,7 @@ function updateSummaryBoxes() {
 function renderCharts() {
   const barCtx = document.getElementById('barChart');
   if (barCtx) {
-    const labels = dbSistem.map(item => item.sn);
+    const labels = dbSistem.map(item => `${item.sn} (${item.product})`);
     const dataProgres = dbSistem.map(item => item.progres);
     if (barChartInstance) barChartInstance.destroy();
 
@@ -110,7 +132,7 @@ function renderCharts() {
 
   const donutCtx = document.getElementById('donutChart');
   if (donutCtx) {
-    const countRI = dbSistem.filter(item => item.product === 'Rock Imager').length;
+    const countRI = dbSistem.filter(item => item.product === 'RI360' || item.product === 'Rock Imager').length;
     const countNT8 = dbSistem.filter(item => item.product === 'NT8').length;
     const countFormulator = dbSistem.filter(item => item.product === 'Formulator').length;
     if (donutChartInstance) donutChartInstance.destroy();
@@ -118,7 +140,7 @@ function renderCharts() {
     donutChartInstance = new Chart(donutCtx, {
       type: 'doughnut',
       data: {
-        labels: ['Rock Imager', 'NT8', 'Formulator'],
+        labels: ['RI360', 'NT8', 'Formulator'],
         datasets: [{ data: [countRI, countNT8, countFormulator], backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'] }]
       },
       options: { responsive: true }
@@ -144,16 +166,22 @@ window.renderTabelTracking = async function() {
   dbSistem.forEach((item) => {
     const tr = document.createElement("tr");
     let statusWarna = item.progres === 100 ? "#10b981" : "#3b82f6";
+    const infoProgresSpesifik = getTahapanSpesifik(item);
+
     tr.innerHTML = `
-      <td style="font-weight: 600;">${item.product}</td>
+      <td><strong>${item.product}</strong><br><small style="color:#64748b;">${item.optional || '-'}</small></td>
       <td>${item.sn}</td>
-      <td style="color: #64748b;">${item.startDate} s/d ${item.endDate}</td>
-      <td><strong>${item.progres}%</strong></td>
+      <td style="color: #64748b;">${item.startDate || '-'} s/d ${item.endDate || '-'}</td>
+      <td>
+        <div style="font-weight: 600; color: #2563eb; font-size: 13px;">${infoProgresSpesifik}</div>
+        <div style="background: #e2e8f0; border-radius: 4px; width: 100%; height: 6px; margin-top: 4px;">
+          <div style="background: #3b82f6; width: ${item.progres}%; height: 6px; border-radius: 4px;"></div>
+        </div>
+      </td>
       <td><span style="background-color: ${statusWarna}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">${item.status}</span></td>
       <td>
-        <button onclick="hapusData('${item.id}', '${item.sn}')" style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
-          <i class="fas fa-trash"></i> Hapus
-        </button>
+        <button onclick="window.location.href='update.html'" style="background-color: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 4px;" title="Update Progres"><i class="fas fa-edit"></i></button>
+        <button onclick="hapusData('${item.id}', '${item.sn}')" style="background-color: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;" title="Hapus Data"><i class="fas fa-trash"></i></button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -170,9 +198,9 @@ window.exportToCSV = function() {
   }
 
   let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Product,Serial Number,PO Number,Start Date,End Date,Progres (%),Status\n";
+  csvContent += "Product,Optional,Serial Number,PO Number,Start Date,End Date,Progres (%),Status\n";
   dbSistem.forEach(item => {
-    let row = [`"${item.product || ''}"`, `"${item.sn || ''}"`, `"${item.po || ''}"`, `"${item.startDate || ''}"`, `"${item.endDate || ''}"`, `"${item.progres || 0}"`, `"${item.status || ''}"`];
+    let row = [`"${item.product || ''}"`, `"${item.optional || ''}"`, `"${item.sn || ''}"`, `"${item.po || ''}"`, `"${item.startDate || ''}"`, `"${item.endDate || ''}"`, `"${item.progres || 0}"`, `"${item.status || ''}"`];
     csvContent += row.join(",") + "\n";
   });
 
@@ -201,11 +229,19 @@ window.importFromCSV = async function(event) {
       const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.replace(/^"|"$/g, '').trim());
       
       if (cols.length >= 2) {
-        const [product, sn, po, startDate, endDate, progres, status] = cols;
+        const [product, optional, sn, po, startDate, endDate, progres, status] = cols;
         if (sn) {
           try {
             await addDoc(collection(db, COLLECTION_NAME), {
-              product: product || "NT8", sn, po: po || "-", startDate: startDate || "-", endDate: endDate || "-", progres: Number(progres) || 0, status: status || "New", createdAt: new Date()
+              product: product || "NT8", 
+              optional: optional || "-", 
+              sn, 
+              po: po || "-", 
+              startDate: startDate || "-", 
+              endDate: endDate || "-", 
+              progres: Number(progres) || 0, 
+              status: status || "New", 
+              createdAt: new Date()
             });
             successCount++;
           } catch (err) { console.error(err); }
