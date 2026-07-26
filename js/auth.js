@@ -1,6 +1,10 @@
 // =========================================================================
 // ROLE-BASED ACCESS CONTROL (RBAC) SECURITY GUARD
 // =========================================================================
+
+// Langsung sembunyikan seluruh halaman sedari awal untuk mencegah efek "blink/flash"
+document.documentElement.style.visibility = "hidden";
+
 document.addEventListener("DOMContentLoaded", () => {
   const role = localStorage.getItem("active_user_role") || "guest";
   const currentPage = window.location.pathname.split("/").pop() || "dashboard.html";
@@ -53,4 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  // 3. Tampilkan kembali halaman setelah semua pengecekan selesai dengan mulus
+  document.documentElement.style.visibility = "visible";
 });
