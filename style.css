@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
 
+/* --- Reset & Global Styles --- */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -23,6 +24,7 @@ body {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  color: #1e293b;
 }
 
 /* --- Layout Utama --- */
@@ -30,6 +32,7 @@ body {
   display: flex;
   width: 100%;
   height: 100vh;
+  overflow: hidden;
 }
 
 /* --- Sidebar Styling --- */
@@ -40,6 +43,8 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  height: 100vh;
+  z-index: 100;
   transition:
     margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1),
     opacity 0.4s ease;
@@ -49,6 +54,7 @@ body {
 .sidebar.sembunyi {
   margin-left: -280px;
   opacity: 0;
+  visibility: hidden;
 }
 
 .sidebar-header {
@@ -67,6 +73,7 @@ body {
   list-style: none;
   padding: 20px 0;
   flex-grow: 1;
+  overflow-y: auto;
 }
 
 .sidebar-menu li {
@@ -74,7 +81,9 @@ body {
   cursor: pointer;
   color: #475569;
   font-weight: 500;
-  transition: 0.3s;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar-menu li:hover,
@@ -85,12 +94,14 @@ body {
 }
 
 .sidebar-menu i {
-  margin-right: 10px;
+  margin-right: 12px;
   width: 20px;
+  text-align: center;
 }
 
 .sidebar-footer {
   padding: 20px;
+  border-top: 1px solid #f1f5f9;
 }
 
 /* --- Main Content Styling --- */
@@ -99,9 +110,8 @@ body {
   padding: 30px;
   overflow-y: auto;
   background-color: #f8fafc;
-  transition:
-    margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  height: 100vh;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* Header Dashboard (Selamat Datang) */
@@ -127,7 +137,7 @@ body {
 }
 .tab-content.active {
   display: block;
-  animation: fadeIn 0.4s;
+  animation: fadeIn 0.4s ease;
 }
 
 @keyframes fadeIn {
@@ -156,6 +166,10 @@ body {
   border: none !important;
 }
 
+.card {
+  margin-bottom: 20px;
+}
+
 /* Styling Khusus Value Box agar angkanya besar dan berwarna */
 .value-box {
   padding: 20px;
@@ -178,7 +192,7 @@ body {
   font-weight: 700;
 }
 
-/* Warna Background untuk Value Box (Sesuai bs4Dash) */
+/* Warna Background untuk Value Box */
 .box-primary {
   background-color: #3b82f6;
   color: white;
@@ -204,10 +218,13 @@ body {
 .card-header {
   background-color: #ffffff !important;
   border-bottom: 1px solid #f1f5f9 !important;
-  padding: 15px 20px;
+  padding: 18px 20px;
   font-weight: 600 !important;
   color: #1e293b !important;
   border-radius: 14px 14px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .card-body {
@@ -218,16 +235,16 @@ body {
 button {
   border-radius: 8px !important;
   font-weight: 600;
-  padding: 10px 15px;
+  padding: 10px 16px;
   border: none;
   cursor: pointer;
   width: auto;
-  transition: 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s;
 }
 
 button:hover {
-  transform: translateY(-2px);
-  opacity: 0.9;
+  transform: translateY(-1px);
+  opacity: 0.92;
 }
 
 .btn-danger {
@@ -248,6 +265,7 @@ button:hover {
   font-size: 13px;
   margin-bottom: 15px;
 }
+
 .chart-placeholder {
   height: 350px;
   background: #f1f5f9;
@@ -260,22 +278,32 @@ button:hover {
 }
 
 /* --- Styling Tabel --- */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
+  white-space: nowrap; /* Mencegah teks tabel turun secara berantakan di layar sempit */
 }
+
 .data-table th,
 .data-table td {
-  padding: 14px 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid #e2e8f0;
   text-align: left;
   font-size: 14px;
 }
+
 .data-table th {
   background: #f8fafc;
   color: #475569;
   font-weight: 600;
 }
+
 .data-table tr:hover {
   background-color: #f1f5f9;
 }
@@ -299,15 +327,17 @@ button:hover {
   .sidebar.mobile-show {
     margin-left: 0;
     opacity: 1;
+    visibility: visible;
   }
 
-  /* Ubah padding utama agar tidak terlalu sempit di layar kecil */
+  /* Ubah padding utama agar pas di layar kecil */
   .content-wrapper {
     padding: 20px 15px;
     margin-left: 0 !important;
+    width: 100%;
   }
 
-  /* Kecilkan ukuran teks judul */
+  /* Penyesuaian ukuran teks judul */
   .dashboard-header h1 {
     font-size: 20px;
   }
@@ -318,17 +348,12 @@ button:hover {
     gap: 15px;
   }
 
-  /* Paksa card (tabel & grafik) untuk mengambil 100% lebar layar */
+  /* Paksa card mengambil 100% lebar layar */
   .card {
     width: 100% !important;
   }
 
-  /* Agar tabel tidak berantakan, buat area card-body bisa di-scroll ke kanan/kiri */
-  .card-body {
-    overflow-x: auto;
-  }
-
-  /* Penyesuaian header card agar tombol export/import rapi di HP */
+  /* Perbaikan struktur card header agar responsif di mobile */
   .card-header {
     flex-direction: column;
     align-items: flex-start !important;
