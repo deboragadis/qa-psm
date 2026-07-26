@@ -57,6 +57,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   const today = new Date().toISOString().split('T')[0];
   if (document.getElementById("input-date1")) document.getElementById("input-date1").value = today;
   if (document.getElementById("input-plan-shipped")) document.getElementById("input-plan-shipped").value = today;
+
+  // Otomatis pilih PIC QC berdasarkan user yang sedang login dan kunci (disabled)
+  const loggedInUser = localStorage.getItem("loggedInUser");
+  const selectPic = document.getElementById("input-pic");
+  if (loggedInUser && selectPic) {
+    const formattedUser = loggedInUser.charAt(0).toUpperCase() + loggedInUser.slice(1).toLowerCase();
+    
+    for (let option of selectPic.options) {
+      if (option.value === formattedUser) {
+        selectPic.value = formattedUser;
+        break;
+      }
+    }
+    
+    // Mengunci dropdown agar tidak bisa diubah-ubah
+    selectPic.disabled = true;
+    selectPic.style.backgroundColor = "#f1f5f9";
+    selectPic.style.color = "#64748b";
+    selectPic.style.cursor = "not-allowed";
+  }
 });
 
 // Simpan Data Baru ke Cloud Firestore
@@ -67,7 +87,11 @@ window.simpanDataBaru = async function() {
   const customer = document.getElementById("input-customer").value.trim();
   const statusPo = document.getElementById("input-status-po").value;
   const po = document.getElementById("input-po").value.trim();
-  const picQc = document.getElementById("input-pic").value;
+  
+  // Mengambil nilai PIC QC meskipun elemennya berstatus disabled
+  const selectPic = document.getElementById("input-pic");
+  const picQc = selectPic ? selectPic.value : "Guest";
+  
   const planShipped = document.getElementById("input-plan-shipped").value || "-";
   const startDate = document.getElementById("input-date1").value || "-";
   const endDate = "-"; // End Date non-aktif karena progres awal masih 0%
