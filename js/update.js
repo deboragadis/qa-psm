@@ -67,10 +67,10 @@ window.muatDetailUpdate = function() {
   if (productName === "Formulator") {
     // 1. Checklist Formulator
     const formulatorItems = [
-      "Software", "Set Up", "LeakingTest 1st", "General Check", "Drippan Test", 
-      "BIM Washing", "Dead Volume1st", "Stage", "Prime Test", "Check Board1st", 
-      "VolumeMapping", "CV Test", "24 LinbroCV Simulation", "DeadVolume 2nd", 
-      "LeakingTest 2nd", "Volume Mapping2nd", "Check Board2nd", "Cleaning"
+      "Software Set Up", "Leaking Test 1st", "General Check", "Drippan Test", 
+      "BIM Washing", "Dead Volume 1st", "Stage", "Prime Test", "Check Board 1st", 
+      "Volume Mapping", "CV Test", "24 Linbro CV Simulation", "Dead Volume 2nd", 
+      "LeakingTest 2nd", "Volume Mapping 2nd", "Check Board 2nd", "Cleaning"
     ];
     
     const postQaItems = ["Final QA", "Post QA", "Packing", "Shipping"];
@@ -94,12 +94,12 @@ window.muatDetailUpdate = function() {
     const showLCP = optionalVal.includes("LCP");
     const showPC = optionalVal.includes("PC");
 
-    const qc1Items = ["General Check", "MechanichalMovement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
+    const qc1Items = ["General Check", "Mechanichal Movement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
     if (showLCP) qc1Items.push("LCP Check");
     if (showPC) qc1Items.push("PC Check");
     qc1Items.push("Lifetime Test");
 
-    const qc2Items = ["MechanicalMovement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
+    const qc2Items = ["Mechanical Movement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
     if (showLCP) qc2Items.push("LCP Check");
     if (showPC) qc2Items.push("PC Check");
 
