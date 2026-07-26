@@ -1,24 +1,11 @@
 // =========================================================================
-// 0. INISIALISASI FIREBASE & SDK
+// INISIALISASI FIREBASE & SDK
 // =========================================================================
 import { db, COLLECTION_NAME } from "./firebase.js";
 import { tampilkanNamaUser } from "./common.js";
 import { collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 let dbSistem = [];
-
-// Daftar item Checklist QC_1 dan QC_2
-const checklistItemsQC1 = [
-  "General_Check", "Mechanical_Movement_1", "Dead_Volume_1", "Contamination_1",
-  "CV_1", "Sitting_Drop_1", "Hanging_Drop_1", "LCP_Check_1",
-  "PC_Check_1", "Lifetime_Test"
-];
-
-const checklistItemsQC2 = [
-  "Mechanical_Movement_2", "Dead_Volume_2", "Contamination_2", "CV_2",
-  "Sitting_Drop_2", "Hanging_Drop_2", "LCP_Check_2", "PC_Check_2",
-  "Final_QA", "Post_QA_and_Packing", "Shipping"
-];
 
 // Tarik data dari Cloud Firestore
 async function fetchAllData() {
@@ -47,7 +34,7 @@ function populateUpdateDropdown() {
   });
 }
 
-// Muat detail data, informasi customer/PO, dan render checklist dinamis saat SN dipilih
+// Muat detail data, informasi customer/PO, dan render checklist dinamis berdasarkan produk
 window.muatDetailUpdate = function() {
   const selectedSN = document.getElementById("update-sn").value;
   const targetItem = dbSistem.find(item => item.sn === selectedSN);
@@ -71,48 +58,101 @@ window.muatDetailUpdate = function() {
   document.getElementById("update-po").value = targetItem.po || "Belum ada PO";
   document.getElementById("update-end-date").value = targetItem.endDate && targetItem.endDate !== "-" ? targetItem.endDate : "";
 
-  // Render Checklist HTML berdasarkan Produk
   let savedChecklist = targetItem.checklist || {};
-  
-  let html = `
-    <h3 style="margin-bottom: 10px; font-size: 15px; color: #1e293b;">Checklist untuk: ${targetItem.product}</h3>
+  let html = `<h3 style="margin-bottom: 15px; font-size: 15px; color: #1e293b;">Checklist untuk: ${targetItem.product}</h3>`;
+
+  const productName = targetItem.product;
+  const optionalVal = (targetItem.optional || "").toUpperCase();
+
+  if (productName === "Formulator") {
+    // 1. Checklist Formulator
+    const formulatorItems = [
+      "Software", "Set Up", "LeakingTest 1st", "General Check", "Drippan Test", 
+      "BIM Washing", "Dead Volume1st", "Stage", "Prime Test", "Check Board1st", 
+      "VolumeMapping", "CV Test", "24 LinbroCV Simulation", "DeadVolume 2nd", 
+      "LeakingTest 2nd", "Volume Mapping2nd", "Check Board2nd", "Cleaning"
+    ];
     
-    <div style="margin-bottom: 15px;">
-      <h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">QC_1</h4>
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-  `;
+    const postQaItems = ["Final QA", "Post QA", "Packing", "Shipping"];
 
-  checklistItemsQC1.forEach(key => {
-    let isChecked = savedChecklist[key] ? "checked" : "";
-    html += `
-      <label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-        <input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}
-      </label>
-    `;
-  });
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">Main Checklist</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    formulatorItems.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
 
-  html += `
-      </div>
-    </div>
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">Post QA</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    postQaItems.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
 
-    <div style="margin-bottom: 15px;">
-      <h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">QC_2</h4>
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-  `;
+  } else if (productName === "NT8") {
+    // 2. Checklist NT8 (dengan kondisi LCP & PC check)
+    const showLCP = optionalVal.includes("LCP");
+    const showPC = optionalVal.includes("PC");
 
-  checklistItemsQC2.forEach(key => {
-    let isChecked = savedChecklist[key] ? "checked" : "";
-    html += `
-      <label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-        <input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}
-      </label>
-    `;
-  });
+    const qc1Items = ["General Check", "MechanichalMovement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
+    if (showLCP) qc1Items.push("LCP Check");
+    if (showPC) qc1Items.push("PC Check");
+    qc1Items.push("Lifetime Test");
 
-  html += `
-      </div>
-    </div>
-  `;
+    const qc2Items = ["MechanicalMovement", "Dead Volume", "Contamination", "CV", "Sitting Drop", "Hanging Drop"];
+    if (showLCP) qc2Items.push("LCP Check");
+    if (showPC) qc2Items.push("PC Check");
+
+    const postQaItems = ["Final QA", "Post QA", "Packing", "Shipping"];
+
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">QC 1</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    qc1Items.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
+
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">QC 2</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    qc2Items.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
+
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">Post QA</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    postQaItems.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
+
+  } else {
+    // 3. Checklist Rock Imager / RI360
+    const qaDeployment = ["Pre QA", "General Check", "Electronic Check", "Movement", "Tuning", "Testing"];
+    const opticItems = ["Visible", "UV", "SLP", "MFI", "UVA"];
+    const postQaItems = ["PC - Monitor", "Config Setting", "System properties", "CRM", "Documentation", "Shipping"];
+
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">QA and Deployment</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    qaDeployment.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
+
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">Optic (Optional)</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    opticItems.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
+
+    html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">Post QA</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
+    postQaItems.forEach(key => {
+      let isChecked = savedChecklist[key] ? "checked" : "";
+      html += `<label style="font-size: 13px; color: #334155; display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" class="qc-checkbox" data-key="${key}" ${isChecked} onchange="hitungProgresOtomatis()" style="accent-color: #3b82f6;"> ${key}</label>`;
+    });
+    html += `</div></div>`;
+  }
 
   if (container) {
     container.innerHTML = html;
