@@ -20,6 +20,39 @@ async function fetchAllData() {
   }
 }
 
+// Logika Dinamis: Mengubah opsi "Optional Sistem" berdasarkan Produk yang dipilih
+window.updateOptionalOptions = function() {
+  const product = document.getElementById("input-product").value;
+  const selectOptional = document.getElementById("input-optional");
+  if (!selectOptional) return;
+
+  selectOptional.innerHTML = "";
+
+  if (product === "Formulator") {
+    ["10 SP", "16 SP", "34 SP"].forEach(opt => {
+      const el = document.createElement("option");
+      el.value = opt;
+      el.textContent = opt;
+      selectOptional.appendChild(el);
+    });
+  } else if (product === "NT8") {
+    ["LV ONLY", "LV+LCP", "LV", "LCP"].forEach(opt => {
+      const el = document.createElement("option");
+      el.value = opt;
+      el.textContent = opt;
+      selectOptional.appendChild(el);
+    });
+  } else {
+    // Untuk RI360 atau produk lainnya
+    ["Standard", "Custom"].forEach(opt => {
+      const el = document.createElement("option");
+      el.value = opt;
+      el.textContent = opt;
+      selectOptional.appendChild(el);
+    });
+  }
+};
+
 // Logika Interaktif: Jika Status PO "Belum ada PO", kunci field Customer & Nomor PO
 window.toggleStatusPO = function() {
   const statusPO = document.getElementById("input-status-po").value;
@@ -53,6 +86,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   tampilkanNamaUser();
   await fetchAllData();
   
+  // Inisialisasi opsi optional sistem pertama kali saat halaman dimuat
+  updateOptionalOptions();
+
   // Set tanggal default hari ini ke Start Date QC dan Plan Shipped
   const today = new Date().toISOString().split('T')[0];
   if (document.getElementById("input-date1")) document.getElementById("input-date1").value = today;
@@ -91,7 +127,7 @@ window.simpanDataBaru = async function() {
   // Mengambil nilai PIC QC meskipun elemennya berstatus disabled
   const selectPic = document.getElementById("input-pic");
   const picQc = selectPic ? selectPic.value : "Guest";
-  
+
   const planShipped = document.getElementById("input-plan-shipped").value || "-";
   const startDate = document.getElementById("input-date1").value || "-";
   const endDate = "-"; // End Date non-aktif karena progres awal masih 0%
