@@ -6,6 +6,7 @@ import { tampilkanNamaUser } from "./common.js";
 import { collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 let dbSistem = [];
+let currentProductTotalItems = 0; // Variabel penyimpan total item checklist produk aktif
 
 // Tarik data dari Cloud Firestore
 async function fetchAllData() {
@@ -130,6 +131,8 @@ window.muatDetailUpdate = function() {
   const productName = targetItem.product;
   const optionalVal = (targetItem.optional || "").toUpperCase();
 
+  let activeItemsList = [];
+
   if (productName === "Formulator") {
     const formulatorItems = [
       "Software Set Up", "Leaking Test 1st", "General Check", "Drippan Test", 
@@ -138,6 +141,7 @@ window.muatDetailUpdate = function() {
       "LeakingTest 2nd", "Volume Mapping 2nd", "Check Board 2nd", "Cleaning"
     ];
     const postQaItems = ["Final QA", "Post QA", "Packing", "Shipping"];
+    activeItemsList = [...formulatorItems, ...postQaItems];
 
     html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">Main Checklist</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
     formulatorItems.forEach(key => {
@@ -167,6 +171,7 @@ window.muatDetailUpdate = function() {
     if (showPC) qc2Items.push("PC Check");
 
     const postQaItems = ["Final QA", "Post QA", "Packing", "Shipping"];
+    activeItemsList = [...qc1Items, ...qc2Items, ...postQaItems];
 
     html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">QC 1</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
     qc1Items.forEach(key => {
@@ -194,6 +199,7 @@ window.muatDetailUpdate = function() {
     const qaDeployment = ["Pre QA", "General Check", "Electronic Check", "Movement", "Tuning", "Testing"];
     const opticItems = ["Visible", "UV", "SLP", "MFI", "UVA"];
     const postQaItems = ["PC - Monitor", "Config Setting", "System properties", "CRM", "Documentation", "Shipping"];
+    activeItemsList = [...qaDeployment, ...opticItems, ...postQaItems];
 
     html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">QA and Deployment</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
     qaDeployment.forEach(key => {
@@ -217,25 +223,25 @@ window.muatDetailUpdate = function() {
     html += `</div></div>`;
   }
 
+  // Simpan total item standar produk ini agar persentase stabil
+  currentProductTotalItems = activeItemsList.length;
+
   if (container) {
     container.innerHTML = html;
   }
   hitungProgresOtomatis();
 };
 
-// Hitung persentase progres secara otomatis & kelola aktifnya End Date QC berdasarkan "Final QA"
+// Hitung persentase progres secara akurat dan konsisten
 window.hitungProgresOtomatis = function() {
   const checkboxes = document.querySelectorAll(".qc-checkbox");
   if (checkboxes.length === 0) return;
 
-  let totalCheck = checkboxes.length;
   let checkedCount = 0;
   let isFinalQAChecked = false;
-  let isAllChecked = true;
 
   checkboxes.forEach(cb => {
     if (cb.checked) checkedCount++;
-    else isAllChecked = false;
 
     let key = cb.getAttribute("data-key");
     if (key === "Final QA" && cb.checked) {
@@ -243,7 +249,10 @@ window.hitungProgresOtomatis = function() {
     }
   });
 
-  let percentage = Math.round((checkedCount / totalCheck) * 100);
+  // Gunakan total item standar produk yang sedang dimuat, hindari pembagian dinamis yang berubah
+  let totalDivisor = currentProductTotalItems > 0 ? currentProductTotalItems : checkboxes.length;
+  let percentage = Math.round((checkedCount / totalDivisor) * 100);
+  if (percentage > 100) percentage = 100;
   
   const inputProgres = document.getElementById("update-progres");
   const labelProgres = document.getElementById("label-progres");
@@ -272,7 +281,7 @@ window.hitungProgresOtomatis = function() {
   }
 };
 
-// Simpan perubahan progres, logistik PO, dan End Date QC ke Cloud Firestore
+// Simpan perubahan progres ke Cloud Firestore
 window.simpanUpdateProgres = async function() {
   const selectedSN = document.getElementById("update-sn").value;
   const newProgres = Number(document.getElementById("update-progres") ? document.getElementById("update-progres").value : 0);
@@ -312,9 +321,6 @@ window.simpanUpdateProgres = async function() {
     checklistData[key] = cb.checked;
   });
 
-  // Logika Status: 
-  // Jika semua checklist tercentang (allChecked), status menjadi "Shipped" (sehingga QC Selesai di dashboard box menjadi 0 dan Shipment bertambah)
-  // Jika Final QA tercentang tetapi belum semua, status "Completed" (QC Selesai bertambah 1)
   let newStatus = "In Progress";
   if (allChecked) {
     newStatus = "Shipped";
