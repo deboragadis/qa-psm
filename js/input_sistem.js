@@ -65,32 +65,57 @@ window.updateOptionalOptions = function() {
   }
 };
 
-// Logika Interaktif: Jika Status PO "Belum ada PO", kunci field Customer & Nomor PO
+// Logika Interaktif: Jika Status PO "Belum ada PO", kunci Customer, Nomor PO, & Plan Shipped
 window.toggleStatusPO = function() {
   const statusPO = document.getElementById("input-status-po").value;
   const inputPO = document.getElementById("input-po");
   const inputCustomer = document.getElementById("input-customer");
+  const inputPlanShipped = document.getElementById("input-plan-shipped");
 
   if (statusPO === "Belum ada PO") {
-    inputPO.value = "Belum ada PO";
-    inputPO.disabled = true;
-    inputPO.style.backgroundColor = "#f1f5f9";
-    inputPO.style.color = "#64748b";
+    if (inputPO) {
+      inputPO.value = "Belum ada PO";
+      inputPO.disabled = true;
+      inputPO.style.backgroundColor = "#f1f5f9";
+      inputPO.style.color = "#64748b";
+    }
 
-    inputCustomer.value = "Belum ada PO";
-    inputCustomer.disabled = true;
-    inputCustomer.style.backgroundColor = "#f1f5f9";
-    inputCustomer.style.color = "#64748b";
+    if (inputCustomer) {
+      inputCustomer.value = "Belum ada PO";
+      inputCustomer.disabled = true;
+      inputCustomer.style.backgroundColor = "#f1f5f9";
+      inputCustomer.style.color = "#64748b";
+    }
+
+    if (inputPlanShipped) {
+      inputPlanShipped.value = "";
+      inputPlanShipped.disabled = true;
+      inputPlanShipped.style.backgroundColor = "#f1f5f9";
+      inputPlanShipped.style.color = "#64748b";
+      inputPlanShipped.style.cursor = "not-allowed";
+    }
   } else {
-    inputPO.value = "";
-    inputPO.disabled = false;
-    inputPO.style.backgroundColor = "#ffffff";
-    inputPO.style.color = "#000000";
+    if (inputPO) {
+      inputPO.value = "";
+      inputPO.disabled = false;
+      inputPO.style.backgroundColor = "#ffffff";
+      inputPO.style.color = "#000000";
+    }
 
-    inputCustomer.value = "";
-    inputCustomer.disabled = false;
-    inputCustomer.style.backgroundColor = "#ffffff";
-    inputCustomer.style.color = "#000000";
+    if (inputCustomer) {
+      inputCustomer.value = "";
+      inputCustomer.disabled = false;
+      inputCustomer.style.backgroundColor = "#ffffff";
+      inputCustomer.style.color = "#000000";
+    }
+
+    if (inputPlanShipped) {
+      inputPlanShipped.disabled = false;
+      inputPlanShipped.style.backgroundColor = "#ffffff";
+      inputPlanShipped.style.color = "#000000";
+      inputPlanShipped.style.cursor = "pointer";
+      inputPlanShipped.value = new Date().toISOString().split('T')[0];
+    }
   }
 };
 
@@ -101,10 +126,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Inisialisasi opsi optional sistem pertama kali saat halaman dimuat
   updateOptionalOptions();
 
-  // Set tanggal default hari ini ke Start Date QC dan Plan Shipped
+  // Set tanggal default hari ini ke Start Date QC saja
   const today = new Date().toISOString().split('T')[0];
   if (document.getElementById("input-date1")) document.getElementById("input-date1").value = today;
-  if (document.getElementById("input-plan-shipped")) document.getElementById("input-plan-shipped").value = today;
+
+  // Jalankan toggle status PO di awal untuk mengunci field yang sesuai
+  toggleStatusPO();
 
   // Otomatis pilih PIC QC berdasarkan user yang sedang login dan kunci (disabled)
   const loggedInUser = localStorage.getItem("loggedInUser");
@@ -140,7 +167,8 @@ window.simpanDataBaru = async function() {
   const selectPic = document.getElementById("input-pic");
   const picQc = selectPic ? selectPic.value : "Guest";
 
-  const planShipped = document.getElementById("input-plan-shipped").value || "-";
+  // Jika belum ada PO, planShipped bernilai "-"
+  const planShipped = statusPo === "Belum ada PO" ? "-" : (document.getElementById("input-plan-shipped").value || "-");
   const startDate = document.getElementById("input-date1").value || "-";
   const endDate = "-"; // End Date non-aktif karena progres awal masih 0%
 
