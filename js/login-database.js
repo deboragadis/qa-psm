@@ -12,3 +12,5 @@ const registeredAccounts = [
   { username: "bima", password: "12345", role: "staff" },
   
 ];
+
+localStorage.setItem("active_user_role", akunDitemukan.role);
