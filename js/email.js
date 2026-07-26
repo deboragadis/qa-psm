@@ -26,7 +26,7 @@ function generatePreview() {
   if (!previewDiv) return;
 
   if (dbSistem.length === 0) {
-    previewDiv.innerHTML = "<p>Tidak ada data sistem yang tersedia untuk dibuat resumenya.</p>";
+    previewDiv.innerHTML = "<p style='margin:0;'>Tidak ada data sistem yang tersedia untuk dibuat resumenya.</p>";
     textForMailto = "Tidak ada data sistem yang tersedia untuk dibuat resumenya.";
     return;
   }
@@ -38,33 +38,33 @@ function generatePreview() {
   const totalShipment = dbSistem.filter(item => item.status === "Shipped").length;
   const tanggalLaporan = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  // === 1. BUAT VERSI HTML (TABEL SUPER RAPAT) UNTUK PREVIEW DI UI ===
+  // === 1. BUAT VERSI HTML (TABEL SUPER RAPAT / 1px-1.5px) ===
   let htmlContent = `
-    <div style="font-family: Arial, sans-serif; color: #333;">
-      <h3 style="text-align: center; color: #3b82f6; margin: 0 0 2px 0; font-size: 14px;">LAPORAN RESUME PROGRES QC INSTRUMENT (SITRAQ)</h3>
-      <p style="text-align: center; margin: 0 0 8px 0; font-size: 12px;"><strong>Tanggal Laporan:</strong> ${tanggalLaporan}</p>
+    <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.1;">
+      <h3 style="text-align: center; color: #3b82f6; margin: 0; padding: 0; font-size: 13px;">LAPORAN RESUME PROGRES QC INSTRUMENT (SITRAQ)</h3>
+      <p style="text-align: center; margin: 1px 0 4px 0; padding: 0; font-size: 11px;"><strong>Tanggal Laporan:</strong> ${tanggalLaporan}</p>
 
-      <h4 style="margin: 0 0 2px 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; font-size: 13px;">RINGKASAN STOK & PROGRES</h4>
-      <ul style="margin: 2px 0 8px 0; padding-left: 20px; font-size: 12px; line-height: 1.1;">
-        <li>Total Sistem Terdaftar: <strong>${dbSistem.length}</strong></li>
-        <li>RI360 / Rock Imager: <strong>${totalRI}</strong></li>
-        <li>NT8: <strong>${totalNT8}</strong></li>
-        <li>Formulator: <strong>${totalFormulator}</strong></li>
-        <li>QC Selesai (100%): <strong>${totalSelesai}</strong></li>
-        <li>Shipped: <strong>${totalShipment}</strong></li>
+      <h4 style="margin: 2px 0 1px 0; padding: 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; font-size: 12px;">RINGKASAN STOK & PROGRES</h4>
+      <ul style="margin: 1px 0 4px 0; padding-left: 18px; font-size: 11px; line-height: 1.2;">
+        <li style="margin: 0; padding: 0;">Total Sistem Terdaftar: <strong>${dbSistem.length}</strong></li>
+        <li style="margin: 0; padding: 0;">RI360 / Rock Imager: <strong>${totalRI}</strong></li>
+        <li style="margin: 0; padding: 0;">NT8: <strong>${totalNT8}</strong></li>
+        <li style="margin: 0; padding: 0;">Formulator: <strong>${totalFormulator}</strong></li>
+        <li style="margin: 0; padding: 0;">QC Selesai (100%): <strong>${totalSelesai}</strong></li>
+        <li style="margin: 0; padding: 0;">Shipped: <strong>${totalShipment}</strong></li>
       </ul>
 
-      <h4 style="margin: 0 0 2px 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; font-size: 13px;">DETAIL DAFTAR SISTEM & PROGRES</h4>
-      <table border="1" cellpadding="2" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; border-color: #cbd5e1;">
+      <h4 style="margin: 2px 0 1px 0; padding: 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; font-size: 12px;">DETAIL DAFTAR SISTEM & PROGRES</h4>
+      <table border="1" cellpadding="2" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; border-color: #cbd5e1; margin-top: 2px;">
         <thead style="background-color: #f1f5f9; color: #334155;">
           <tr>
-            <th style="padding: 3px;">No</th>
-            <th style="padding: 3px;">Product</th>
-            <th style="padding: 3px;">SN</th>
-            <th style="padding: 3px;">Optional</th>
-            <th style="padding: 3px; text-align: center;">Progres</th>
-            <th style="padding: 3px;">Notes</th>
-            <th style="padding: 3px;">Status</th>
+            <th style="padding: 2px 4px; margin: 0;">No</th>
+            <th style="padding: 2px 4px; margin: 0;">Product</th>
+            <th style="padding: 2px 4px; margin: 0;">SN</th>
+            <th style="padding: 2px 4px; margin: 0;">Optional</th>
+            <th style="padding: 2px 4px; margin: 0; text-align: center;">Progres</th>
+            <th style="padding: 2px 4px; margin: 0;">Notes</th>
+            <th style="padding: 2px 4px; margin: 0;">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -92,20 +92,19 @@ function generatePreview() {
       }
     }
 
-    // Tambah row tabel ke HTML (Rapat)
+    // Tambah row tabel ke HTML (Rapat Ekstrem 1-1.5px)
     htmlContent += `
       <tr>
-        <td style="padding: 3px; text-align: center;">${index + 1}</td>
-        <td style="padding: 3px;"><strong>${item.product}</strong></td>
-        <td style="padding: 3px;">${item.sn}</td>
-        <td style="padding: 3px;">${item.optional || '-'}</td>
-        <td style="padding: 3px; color: #2563eb; font-weight: bold; text-align: center;">${item.progres}%</td>
-        <td style="padding: 3px;">${catatanNote}</td>
-        <td style="padding: 3px;">${item.status}</td>
+        <td style="padding: 2px 4px; text-align: center;">${index + 1}</td>
+        <td style="padding: 2px 4px;"><strong>${item.product}</strong></td>
+        <td style="padding: 2px 4px;">${item.sn}</td>
+        <td style="padding: 2px 4px;">${item.optional || '-'}</td>
+        <td style="padding: 2px 4px; color: #2563eb; font-weight: bold; text-align: center;">${item.progres}%</td>
+        <td style="padding: 2px 4px;">${catatanNote}</td>
+        <td style="padding: 2px 4px;">${item.status}</td>
       </tr>
     `;
 
-    // Tambah baris ke versi teks biasa
     textForMailto += `${index + 1}. [${item.product}] SN: ${item.sn} | Optional: ${item.optional || '-'} | Progres: ${item.progres}% (${catatanNote}) | Status: ${item.status}\n`;
   });
 
@@ -115,11 +114,9 @@ function generatePreview() {
     </div>
   `;
 
-  // Tampilkan format HTML ke dalam tag div preview
   previewDiv.innerHTML = htmlContent;
 }
 
-// Fungsi kirim email via mailto
 window.kirimEmailReport = function() {
   const emailTo = document.getElementById("email-to").value;
   const subject = document.getElementById("email-subject").value;
@@ -133,9 +130,6 @@ window.kirimEmailReport = function() {
   window.location.href = mailtoUrl;
 };
 
-// =========================================================================
-// FUNGSI SALIN TABEL HTML UNTUK DI-PASTE KE GMAIL/OUTLOOK
-// =========================================================================
 window.salinTabelKeClipboard = function() {
   const previewDiv = document.getElementById("email-preview-content");
   if (!previewDiv) return;
