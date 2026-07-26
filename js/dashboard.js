@@ -9,7 +9,6 @@ let dbSistem = [];
 let barChartInstance = null;
 let donutChartInstance = null;
 
-// Tarik data dari Cloud Firestore
 async function fetchAllData() {
   try {
     const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
@@ -27,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await window.renderTabelTracking();
 });
 
-// Fungsi untuk mendeteksi tahapan spesifik checklist terakhir yang aktif dicentang
+// Fungsi untuk mendeteksi catatan tahapan spesifik checklist terakhir yang aktif
 function getTahapanSpesifik(item) {
   if (!item.checklist || Object.keys(item.checklist).length === 0) {
     return item.progres === 100 ? "Selesai (100%)" : `${item.progres}% (New / Belum mulai)`;
@@ -40,9 +39,9 @@ function getTahapanSpesifik(item) {
     return `${item.progres}% (Belum ada tahapan)`;
   }
 
-  // Ambil tahapan aktif terakhir
+  // Ambil tahapan aktif terakhir sebagai notes di dashboard
   let tahapanTerakhir = checklistAktif[checklistAktif.length - 1].replace(/_/g, " ");
-  return `${item.progres}% (${tahapanTerakhir})`;
+  return `${item.progres}% - ${tahapanTerakhir}`;
 }
 
 window.simpanDataBaru = async function() {
@@ -166,14 +165,14 @@ window.renderTabelTracking = async function() {
   dbSistem.forEach((item) => {
     const tr = document.createElement("tr");
     let statusWarna = item.progres === 100 ? "#10b981" : "#3b82f6";
-    const infoProgresSpesifik = getTahapanSpesifik(item);
+    const infoTahapanNote = getTahapanSpesifik(item);
 
     tr.innerHTML = `
       <td><strong>${item.product}</strong><br><small style="color:#64748b;">${item.optional || '-'}</small></td>
       <td>${item.sn}</td>
       <td style="color: #64748b;">${item.startDate || '-'} s/d ${item.endDate || '-'}</td>
       <td>
-        <div style="font-weight: 600; color: #2563eb; font-size: 13px;">${infoProgresSpesifik}</div>
+        <div style="font-weight: 600; color: #2563eb; font-size: 13px;">${infoTahapanNote}</div>
         <div style="background: #e2e8f0; border-radius: 4px; width: 100%; height: 6px; margin-top: 4px;">
           <div style="background: #3b82f6; width: ${item.progres}%; height: 6px; border-radius: 4px;"></div>
         </div>
