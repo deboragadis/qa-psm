@@ -34,7 +34,7 @@ function populateUpdateDropdown() {
   });
 }
 
-// Logika Interaktif: Jika Status PO "Belum ada PO", kunci field Customer & Nomor PO
+// Logika Interaktif: Status PO "Ada PO" vs "Belum ada PO"
 window.toggleStatusPO = function() {
   const statusPO = document.getElementById("input-status-po").value;
   const inputPO = document.getElementById("update-po");
@@ -65,17 +65,17 @@ window.toggleStatusPO = function() {
     }
   } else {
     if (inputPO) {
-      inputPO.value = "";
       inputPO.disabled = false;
       inputPO.style.backgroundColor = "#ffffff";
       inputPO.style.color = "#000000";
+      if (inputPO.value === "Belum ada PO") inputPO.value = "";
     }
 
     if (inputCustomer) {
-      inputCustomer.value = "";
       inputCustomer.disabled = false;
       inputCustomer.style.backgroundColor = "#ffffff";
       inputCustomer.style.color = "#000000";
+      if (inputCustomer.value === "Belum ada PO") inputCustomer.value = "";
     }
 
     if (inputPlanShipped) {
@@ -83,11 +83,14 @@ window.toggleStatusPO = function() {
       inputPlanShipped.style.backgroundColor = "#ffffff";
       inputPlanShipped.style.color = "#000000";
       inputPlanShipped.style.cursor = "pointer";
+      if (!inputPlanShipped.value) {
+        inputPlanShipped.value = new Date().toISOString().split('T')[0];
+      }
     }
   }
 };
 
-// Muat detail data, informasi customer/PO, dan render checklist dinamis berdasarkan produk
+// Muat detail data saat Serial Number dipilih
 window.muatDetailUpdate = function() {
   const selectedSN = document.getElementById("update-sn").value;
   const targetItem = dbSistem.find(item => item.sn === selectedSN);
@@ -109,7 +112,7 @@ window.muatDetailUpdate = function() {
     return;
   }
 
-  // Isi otomatis data logistik dan status PO
+  // Set Status PO dari data tersimpan
   const statusPoVal = targetItem.statusPo || (targetItem.po && targetItem.po !== "Belum ada PO" ? "Ada PO" : "Belum ada PO");
   document.getElementById("input-status-po").value = statusPoVal;
   toggleStatusPO();
@@ -135,7 +138,6 @@ window.muatDetailUpdate = function() {
       "Volume Mapping", "CV Test", "24 Linbro CV Simulation", "Dead Volume 2nd", 
       "LeakingTest 2nd", "Volume Mapping 2nd", "Check Board 2nd", "Cleaning"
     ];
-    
     const postQaItems = ["Final QA", "Post QA", "Packing", "Shipping"];
 
     html += `<div style="margin-bottom: 15px;"><h4 style="color: #3b82f6; margin-bottom: 8px; font-size: 14px;">Main Checklist</h4><div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">`;
@@ -222,7 +224,7 @@ window.muatDetailUpdate = function() {
   hitungProgresOtomatis();
 };
 
-// Hitung persentase progres secara otomatis berdasarkan kotak checklist yang tercentang
+// Hitung persentase progres secara otomatis & kelola aktifnya End Date QC (100%)
 window.hitungProgresOtomatis = function() {
   const checkboxes = document.querySelectorAll(".qc-checkbox");
   if (checkboxes.length === 0) return;
@@ -243,7 +245,6 @@ window.hitungProgresOtomatis = function() {
   if (inputProgres) inputProgres.value = percentage;
   if (labelProgres) labelProgres.innerText = percentage + "%";
 
-  // Jika progres 100%, aktifkan End Date QC otomatis hari ini
   if (inputDate2) {
     if (percentage === 100) {
       inputDate2.disabled = false;
@@ -263,7 +264,7 @@ window.hitungProgresOtomatis = function() {
   }
 };
 
-// Simpan perubahan progres & checklist ke Cloud Firestore
+// Simpan perubahan progres, logistik PO, dan End Date QC ke Cloud Firestore
 window.simpanUpdateProgres = async function() {
   const selectedSN = document.getElementById("update-sn").value;
   const newProgres = Number(document.getElementById("update-progres") ? document.getElementById("update-progres").value : 0);
@@ -284,7 +285,6 @@ window.simpanUpdateProgres = async function() {
     return;
   }
 
-  // Kumpulkan status centang checklist
   let checklistData = {};
   const checkboxes = document.querySelectorAll(".qc-checkbox");
   checkboxes.forEach(cb => {
@@ -292,7 +292,6 @@ window.simpanUpdateProgres = async function() {
     checklistData[key] = cb.checked;
   });
 
-  // Tentukan status otomatis berdasarkan persentase progres
   let newStatus = "In Progress";
   if (newProgres === 100) {
     newStatus = "Completed";
@@ -321,7 +320,6 @@ window.simpanUpdateProgres = async function() {
   }
 };
 
-// Inisialisasi saat halaman selesai dimuat
 document.addEventListener("DOMContentLoaded", async () => {
   tampilkanNamaUser();
   await fetchAllData();
