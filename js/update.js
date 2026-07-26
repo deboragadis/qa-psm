@@ -34,6 +34,59 @@ function populateUpdateDropdown() {
   });
 }
 
+// Logika Interaktif: Jika Status PO "Belum ada PO", kunci field Customer & Nomor PO
+window.toggleStatusPO = function() {
+  const statusPO = document.getElementById("input-status-po").value;
+  const inputPO = document.getElementById("update-po");
+  const inputCustomer = document.getElementById("update-customer");
+  const inputPlanShipped = document.getElementById("input-plan-shipped");
+
+  if (statusPO === "Belum ada PO") {
+    if (inputPO) {
+      inputPO.value = "Belum ada PO";
+      inputPO.disabled = true;
+      inputPO.style.backgroundColor = "#f1f5f9";
+      inputPO.style.color = "#64748b";
+    }
+
+    if (inputCustomer) {
+      inputCustomer.value = "Belum ada PO";
+      inputCustomer.disabled = true;
+      inputCustomer.style.backgroundColor = "#f1f5f9";
+      inputCustomer.style.color = "#64748b";
+    }
+
+    if (inputPlanShipped) {
+      inputPlanShipped.value = "";
+      inputPlanShipped.disabled = true;
+      inputPlanShipped.style.backgroundColor = "#f1f5f9";
+      inputPlanShipped.style.color = "#64748b";
+      inputPlanShipped.style.cursor = "not-allowed";
+    }
+  } else {
+    if (inputPO) {
+      inputPO.value = "";
+      inputPO.disabled = false;
+      inputPO.style.backgroundColor = "#ffffff";
+      inputPO.style.color = "#000000";
+    }
+
+    if (inputCustomer) {
+      inputCustomer.value = "";
+      inputCustomer.disabled = false;
+      inputCustomer.style.backgroundColor = "#ffffff";
+      inputCustomer.style.color = "#000000";
+    }
+
+    if (inputPlanShipped) {
+      inputPlanShipped.disabled = false;
+      inputPlanShipped.style.backgroundColor = "#ffffff";
+      inputPlanShipped.style.color = "#000000";
+      inputPlanShipped.style.cursor = "pointer";
+    }
+  }
+};
+
 // Muat detail data, informasi customer/PO, dan render checklist dinamis berdasarkan produk
 window.muatDetailUpdate = function() {
   const selectedSN = document.getElementById("update-sn").value;
@@ -42,30 +95,40 @@ window.muatDetailUpdate = function() {
   const container = document.getElementById("checklist-container");
   
   if (!targetItem) {
+    document.getElementById("input-status-po").value = "Belum ada PO";
     document.getElementById("update-customer").value = "";
     document.getElementById("update-po").value = "";
-    document.getElementById("update-end-date").value = "";
+    document.getElementById("input-plan-shipped").value = "";
+    document.getElementById("input-date2").value = "";
     document.getElementById("update-progres").value = "0";
     document.getElementById("label-progres").innerText = "0%";
+    toggleStatusPO();
     if (container) {
       container.innerHTML = `<p style="color: #64748b; font-style: italic;">Silakan pilih Serial Number terlebih dahulu untuk memuat checklist.</p>`;
     }
     return;
   }
 
-  // Isi otomatis data logistik
-  document.getElementById("update-customer").value = targetItem.customer || "Belum ada PO";
-  document.getElementById("update-po").value = targetItem.po || "Belum ada PO";
-  document.getElementById("update-end-date").value = targetItem.endDate && targetItem.endDate !== "-" ? targetItem.endDate : "";
+  // Isi otomatis data logistik dan status PO
+  const statusPoVal = targetItem.statusPo || (targetItem.po && targetItem.po !== "Belum ada PO" ? "Ada PO" : "Belum ada PO");
+  document.getElementById("input-status-po").value = statusPoVal;
+  toggleStatusPO();
+
+  if (statusPoVal === "Ada PO") {
+    document.getElementById("update-customer").value = targetItem.customer || "";
+    document.getElementById("update-po").value = targetItem.po || "";
+    document.getElementById("input-plan-shipped").value = targetItem.planShipped && targetItem.planShipped !== "-" ? targetItem.planShipped : "";
+  }
+
+  document.getElementById("input-date2").value = targetItem.endDate && targetItem.endDate !== "-" ? targetItem.endDate : "";
 
   let savedChecklist = targetItem.checklist || {};
-  let html = `<h3 style="margin-bottom: 15px; font-size: 15px; color: #1e293b;">Checklist untuk: ${targetItem.product}</h3>`;
+  let html = `<h3 style="margin-bottom: 15px; font-size: 15px; color: #1e293b;">Checklist untuk: ${targetItem.product} (${targetItem.optional || '-'})</h3>`;
 
   const productName = targetItem.product;
   const optionalVal = (targetItem.optional || "").toUpperCase();
 
   if (productName === "Formulator") {
-    // 1. Checklist Formulator
     const formulatorItems = [
       "Software Set Up", "Leaking Test 1st", "General Check", "Drippan Test", 
       "BIM Washing", "Dead Volume 1st", "Stage", "Prime Test", "Check Board 1st", 
@@ -90,7 +153,6 @@ window.muatDetailUpdate = function() {
     html += `</div></div>`;
 
   } else if (productName === "NT8") {
-    // 2. Checklist NT8 (dengan kondisi LCP & PC check)
     const showLCP = optionalVal.includes("LCP");
     const showPC = optionalVal.includes("PC");
 
@@ -127,7 +189,7 @@ window.muatDetailUpdate = function() {
     html += `</div></div>`;
 
   } else {
-    // 3. Checklist Rock Imager / RI360
+    // Rock Imager / RI360
     const qaDeployment = ["Pre QA", "General Check", "Electronic Check", "Movement", "Tuning", "Testing"];
     const opticItems = ["Visible", "UV", "SLP", "MFI", "UVA"];
     const postQaItems = ["PC - Monitor", "Config Setting", "System properties", "CRM", "Documentation", "Shipping"];
@@ -176,15 +238,40 @@ window.hitungProgresOtomatis = function() {
   
   const inputProgres = document.getElementById("update-progres");
   const labelProgres = document.getElementById("label-progres");
+  const inputDate2 = document.getElementById("input-date2");
+
   if (inputProgres) inputProgres.value = percentage;
   if (labelProgres) labelProgres.innerText = percentage + "%";
+
+  // Jika progres 100%, aktifkan End Date QC otomatis hari ini
+  if (inputDate2) {
+    if (percentage === 100) {
+      inputDate2.disabled = false;
+      inputDate2.style.backgroundColor = "#ffffff";
+      inputDate2.style.color = "#000000";
+      inputDate2.style.cursor = "pointer";
+      if (!inputDate2.value || inputDate2.value === "-") {
+        inputDate2.value = new Date().toISOString().split('T')[0];
+      }
+    } else {
+      inputDate2.disabled = true;
+      inputDate2.style.backgroundColor = "#f1f5f9";
+      inputDate2.style.color = "#64748b";
+      inputDate2.style.cursor = "not-allowed";
+      inputDate2.value = "";
+    }
+  }
 };
 
 // Simpan perubahan progres & checklist ke Cloud Firestore
 window.simpanUpdateProgres = async function() {
   const selectedSN = document.getElementById("update-sn").value;
   const newProgres = Number(document.getElementById("update-progres") ? document.getElementById("update-progres").value : 0);
-  const endDateVal = document.getElementById("update-end-date") ? document.getElementById("update-end-date").value : "";
+  const statusPoVal = document.getElementById("input-status-po").value;
+  const customerVal = statusPoVal === "Belum ada PO" ? "Belum ada PO" : (document.getElementById("update-customer").value.trim() || "-");
+  const poVal = statusPoVal === "Belum ada PO" ? "Belum ada PO" : (document.getElementById("update-po").value.trim() || "-");
+  const planShippedVal = statusPoVal === "Belum ada PO" ? "-" : (document.getElementById("input-plan-shipped").value || "-");
+  const endDateVal = newProgres === 100 ? (document.getElementById("input-date2").value || "-") : "-";
 
   if (!selectedSN) {
     alert("Peringatan: Silakan pilih Serial Number terlebih dahulu!");
@@ -216,9 +303,13 @@ window.simpanUpdateProgres = async function() {
   try {
     const docRef = doc(db, COLLECTION_NAME, targetItem.id);
     await updateDoc(docRef, {
+      statusPo: statusPoVal,
+      customer: customerVal,
+      po: poVal,
+      planShipped: planShippedVal,
       progres: newProgres,
       status: newStatus,
-      endDate: endDateVal || targetItem.endDate || "-",
+      endDate: endDateVal,
       checklist: checklistData
     });
 
@@ -235,4 +326,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   tampilkanNamaUser();
   await fetchAllData();
   populateUpdateDropdown();
+  toggleStatusPO();
 });
