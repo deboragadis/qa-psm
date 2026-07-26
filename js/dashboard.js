@@ -26,22 +26,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   await window.renderTabelTracking();
 });
 
-// Fungsi untuk mendeteksi catatan tahapan spesifik checklist terakhir yang aktif
-function getTahapanSpesifik(item) {
+// Fungsi untuk mengambil catatan tahapan checklist terakhir untuk kolom Notes
+function getTahapanNote(item) {
   if (!item.checklist || Object.keys(item.checklist).length === 0) {
-    return item.progres === 100 ? "Selesai (100%)" : `${item.progres}% (New / Belum mulai)`;
+    return item.progres === 100 ? "Selesai (100%)" : "-";
   }
 
   let keys = Object.keys(item.checklist);
   let checklistAktif = keys.filter(k => item.checklist[k] === true);
 
   if (checklistAktif.length === 0) {
-    return `${item.progres}% (Belum ada tahapan)`;
+    return "-";
   }
 
-  // Ambil tahapan aktif terakhir sebagai notes di dashboard
+  // Ambil tahapan aktif terakhir dan format menjadi teks biasa
   let tahapanTerakhir = checklistAktif[checklistAktif.length - 1].replace(/_/g, " ");
-  return `${item.progres}% - ${tahapanTerakhir}`;
+  return tahapanTerakhir;
 }
 
 window.simpanDataBaru = async function() {
@@ -151,12 +151,12 @@ window.renderTabelTracking = async function() {
   const tbody = document.getElementById("tabel-tracking");
   if (!tbody) return; 
 
-  tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">Memuat data dari Cloud...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Memuat data dari Cloud...</td></tr>`;
   await fetchAllData();
   tbody.innerHTML = "";
 
   if (dbSistem.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">Data kosong. Silakan Input Sistem Baru.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Data kosong. Silakan Input Sistem Baru.</td></tr>`;
     updateSummaryBoxes();
     renderCharts();
     return;
@@ -165,19 +165,20 @@ window.renderTabelTracking = async function() {
   dbSistem.forEach((item) => {
     const tr = document.createElement("tr");
     let statusWarna = item.progres === 100 ? "#10b981" : "#3b82f6";
-    const infoTahapanNote = getTahapanSpesifik(item);
+    const catatanTahapan = getTahapanNote(item);
 
     tr.innerHTML = `
       <td><strong>${item.product}</strong><br><small style="color:#64748b;">${item.optional || '-'}</small></td>
       <td>${item.sn}</td>
       <td style="color: #64748b;">${item.startDate || '-'} s/d ${item.endDate || '-'}</td>
       <td>
-        <div style="font-weight: 600; color: #2563eb; font-size: 13px;">${infoTahapanNote}</div>
+        <div style="font-weight: 600; color: #2563eb; font-size: 13px;">${item.progres}%</div>
         <div style="background: #e2e8f0; border-radius: 4px; width: 100%; height: 6px; margin-top: 4px;">
           <div style="background: #3b82f6; width: ${item.progres}%; height: 6px; border-radius: 4px;"></div>
         </div>
       </td>
       <td><span style="background-color: ${statusWarna}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">${item.status}</span></td>
+      <td><span style="color: #334155; font-size: 13px; font-weight: 500;">${catatanTahapan}</span></td>
       <td>
         <button onclick="window.location.href='update.html'" style="background-color: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-right: 4px;" title="Update Progres"><i class="fas fa-edit"></i></button>
         <button onclick="hapusData('${item.id}', '${item.sn}')" style="background-color: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;" title="Hapus Data"><i class="fas fa-trash"></i></button>
