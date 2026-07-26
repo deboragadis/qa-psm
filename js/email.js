@@ -16,7 +16,7 @@ async function fetchAllData() {
     });
     generatePreview();
   } catch (error) {
-    console.error("Gagal mengambil data untuk report:", error);
+    console.error("Gagal mengambil data untuk email report:", error);
   }
 }
 
@@ -39,7 +39,7 @@ function generatePreview() {
   resumeText += `Tanggal Laporan: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\n`;
   resumeText += `--- RINGKASAN STOK & PROGRES ---\n`;
   resumeText += `• Total Sistem Terdaftar: ${dbSistem.length}\n`;
-  resumeText += `• Rock Imager / RI360: ${totalRI}\n`;
+  resumeText += `• RI360 / Rock Imager: ${totalRI}\n`;
   resumeText += `• NT8: ${totalNT8}\n`;
   resumeText += `• Formulator: ${totalFormulator}\n`;
   resumeText += `• QC Selesai (100%): ${totalSelesai}\n`;
@@ -47,7 +47,15 @@ function generatePreview() {
   resumeText += `--- DETAIL DAFTAR SISTEM & PROGRES ---\n`;
 
   dbSistem.forEach((item, index) => {
-    resumeText += `${index + 1}. [${item.product}] SN: ${item.sn} | Optional: ${item.optional || '-'} | Progres: ${item.progres}% | Status: ${item.status}\n`;
+    let catatanNote = "-";
+    if (item.checklist) {
+      let keys = Object.keys(item.checklist);
+      let aktif = keys.filter(k => item.checklist[k] === true);
+      if (aktif.length > 0) {
+        catatanNote = aktif[aktif.length - 1].replace(/_/g, " ");
+      }
+    }
+    resumeText += `${index + 1}. [${item.product}] SN: ${item.sn} | Optional: ${item.optional || '-'} | Progres: ${item.progres}% (${catatanNote}) | Status: ${item.status}\n`;
   });
 
   previewDiv.innerText = resumeText;
