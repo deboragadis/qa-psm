@@ -55,7 +55,38 @@ window.logoutUser = function() {
 };
 
 // =========================================================================
-// 2. LOGIKA INPUT SISTEM BARU & PENGECEKAN DUPLIKAT SN
+// 2. LOGIKA INTERAKTIF FORM (STATUS PO & END DATE)
+// =========================================================================
+window.toggleStatusPO = function() {
+  const statusPO = document.getElementById("input-status-po").value;
+  const inputPO = document.getElementById("input-po");
+  const inputCustomer = document.getElementById("input-customer");
+
+  if (statusPO === "Belum ada PO") {
+    inputPO.value = "Belum ada PO";
+    inputPO.disabled = true;
+    inputPO.style.backgroundColor = "#f1f5f9";
+    inputPO.style.color = "#64748b";
+
+    inputCustomer.value = "Belum ada PO";
+    inputCustomer.disabled = true;
+    inputCustomer.style.backgroundColor = "#f1f5f9";
+    inputCustomer.style.color = "#64748b";
+  } else {
+    inputPO.value = "";
+    inputPO.disabled = false;
+    inputPO.style.backgroundColor = "#ffffff";
+    inputPO.style.color = "#000000";
+
+    inputCustomer.value = "";
+    inputCustomer.disabled = false;
+    inputCustomer.style.backgroundColor = "#ffffff";
+    inputCustomer.style.color = "#000000";
+  }
+};
+
+// =========================================================================
+// 3. LOGIKA DATABASE CLOUD & SIMPAN DATA BARU
 // =========================================================================
 let dbSistem = [];
 
@@ -74,34 +105,49 @@ async function fetchAllData() {
 document.addEventListener("DOMContentLoaded", async () => {
   tampilkanNamaUser();
   await fetchAllData(); // Ambil data awal untuk validasi duplikat Serial Number
+
+  // Set tanggal default hari ini ke Start Date QC dan Plan Shipped
+  const today = new Date().toISOString().split('T')[0];
+  if (document.getElementById("input-date1")) document.getElementById("input-date1").value = today;
+  if (document.getElementById("input-plan-shipped")) document.getElementById("input-plan-shipped").value = today;
 });
 
 window.simpanDataBaru = async function() {
-  const valProduct = document.getElementById("input-product").value;
-  const valSN = document.getElementById("input-sn").value.trim();
-  const valPO = document.getElementById("input-po") ? document.getElementById("input-po").value.trim() : "-";
-  const valStartDate = document.getElementById("input-date1") ? document.getElementById("input-date1").value : "-";
-  const valEndDate = document.getElementById("input-date2") ? document.getElementById("input-date2").value : "-";
+  const product = document.getElementById("input-product").value;
+  const sn = document.getElementById("input-sn").value.trim();
+  const optional = document.getElementById("input-optional").value;
+  const customer = document.getElementById("input-customer").value.trim();
+  const statusPo = document.getElementById("input-status-po").value;
+  const po = document.getElementById("input-po").value.trim();
+  const picQc = document.getElementById("input-pic").value;
+  const planShipped = document.getElementById("input-plan-shipped").value || "-";
+  const startDate = document.getElementById("input-date1").value || "-";
+  const endDate = "-"; // End Date non-aktif karena progres awal masih 0%
 
-  if (valSN === "") {
+  if (sn === "") {
     alert("Peringatan: Serial Number harus diisi!");
     return;
   }
 
-  const cekDuplikat = dbSistem.find((item) => item.sn === valSN);
+  const cekDuplikat = dbSistem.find((item) => item.sn === sn);
   if (cekDuplikat) {
-    alert(`Gagal! Serial Number ${valSN} sudah terdaftar di sistem.`);
+    alert(`Gagal! Serial Number ${sn} sudah terdaftar di sistem.`);
     return;
   }
 
   try {
     const dataBaru = {
-      product: valProduct,
-      sn: valSN,
-      po: valPO,
-      startDate: valStartDate,
-      endDate: valEndDate,
-      progres: 0,
+      product,
+      sn,
+      optional,
+      customer,
+      statusPo,
+      po,
+      picQc,
+      planShipped,
+      startDate,
+      endDate,
+      progres: 0, // Progres awal 0%
       status: "New",
       createdAt: new Date()
     };
