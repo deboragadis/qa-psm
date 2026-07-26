@@ -65,60 +65,6 @@ window.updateOptionalOptions = function() {
   }
 };
 
-// Logika Interaktif: Jika Status PO "Belum ada PO", kunci Customer, Nomor PO, & Plan Shipped
-window.toggleStatusPO = function() {
-  const statusPO = document.getElementById("input-status-po").value;
-  const inputPO = document.getElementById("input-po");
-  const inputCustomer = document.getElementById("input-customer");
-  const inputPlanShipped = document.getElementById("input-plan-shipped");
-
-  if (statusPO === "Belum ada PO") {
-    if (inputPO) {
-      inputPO.value = "Belum ada PO";
-      inputPO.disabled = true;
-      inputPO.style.backgroundColor = "#f1f5f9";
-      inputPO.style.color = "#64748b";
-    }
-
-    if (inputCustomer) {
-      inputCustomer.value = "Belum ada PO";
-      inputCustomer.disabled = true;
-      inputCustomer.style.backgroundColor = "#f1f5f9";
-      inputCustomer.style.color = "#64748b";
-    }
-
-    if (inputPlanShipped) {
-      inputPlanShipped.value = "";
-      inputPlanShipped.disabled = true;
-      inputPlanShipped.style.backgroundColor = "#f1f5f9";
-      inputPlanShipped.style.color = "#64748b";
-      inputPlanShipped.style.cursor = "not-allowed";
-    }
-  } else {
-    if (inputPO) {
-      inputPO.value = "";
-      inputPO.disabled = false;
-      inputPO.style.backgroundColor = "#ffffff";
-      inputPO.style.color = "#000000";
-    }
-
-    if (inputCustomer) {
-      inputCustomer.value = "";
-      inputCustomer.disabled = false;
-      inputCustomer.style.backgroundColor = "#ffffff";
-      inputCustomer.style.color = "#000000";
-    }
-
-    if (inputPlanShipped) {
-      inputPlanShipped.disabled = false;
-      inputPlanShipped.style.backgroundColor = "#ffffff";
-      inputPlanShipped.style.color = "#000000";
-      inputPlanShipped.style.cursor = "pointer";
-      inputPlanShipped.value = new Date().toISOString().split('T')[0];
-    }
-  }
-};
-
 document.addEventListener("DOMContentLoaded", async () => {
   tampilkanNamaUser();
   await fetchAllData();
@@ -126,12 +72,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Inisialisasi opsi optional sistem pertama kali saat halaman dimuat
   updateOptionalOptions();
 
-  // Set tanggal default hari ini ke Start Date QC saja
+  // Set tanggal default hari ini ke Start Date QC
   const today = new Date().toISOString().split('T')[0];
   if (document.getElementById("input-date1")) document.getElementById("input-date1").value = today;
-
-  // Jalankan toggle status PO di awal untuk mengunci field yang sesuai
-  toggleStatusPO();
 
   // Otomatis pilih PIC QC berdasarkan user yang sedang login dan kunci (disabled)
   const loggedInUser = localStorage.getItem("loggedInUser");
@@ -139,18 +82,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (loggedInUser && selectPic) {
     const formattedUser = loggedInUser.charAt(0).toUpperCase() + loggedInUser.slice(1).toLowerCase();
     
+    let found = false;
     for (let option of selectPic.options) {
-      if (option.value === formattedUser) {
-        selectPic.value = formattedUser;
+      if (option.value.toLowerCase() === formattedUser.toLowerCase()) {
+        selectPic.value = option.value;
+        found = true;
         break;
       }
     }
     
-    // Mengunci dropdown agar tidak bisa diubah-ubah
-    selectPic.disabled = true;
-    selectPic.style.backgroundColor = "#f1f5f9";
-    selectPic.style.color = "#64748b";
-    selectPic.style.cursor = "not-allowed";
+    // Jika nama user cocok dengan opsi PIC, kunci dropdown-nya
+    if (found) {
+      selectPic.disabled = true;
+      selectPic.style.backgroundColor = "#f1f5f9";
+      selectPic.style.color = "#64748b";
+      selectPic.style.cursor = "not-allowed";
+    }
   }
 });
 
@@ -159,16 +106,11 @@ window.simpanDataBaru = async function() {
   const product = document.getElementById("input-product").value;
   const sn = document.getElementById("input-sn").value.trim();
   const optional = document.getElementById("input-optional").value;
-  const customer = document.getElementById("input-customer").value.trim();
-  const statusPo = document.getElementById("input-status-po").value;
-  const po = document.getElementById("input-po").value.trim();
   
-  // Mengambil nilai PIC QC meskipun elemennya berstatus disabled
+  // Mengambil nilai PIC QC (meskipun berstatus disabled tetap terbaca)
   const selectPic = document.getElementById("input-pic");
   const picQc = selectPic ? selectPic.value : "Guest";
 
-  // Jika belum ada PO, planShipped bernilai "-"
-  const planShipped = statusPo === "Belum ada PO" ? "-" : (document.getElementById("input-plan-shipped").value || "-");
   const startDate = document.getElementById("input-date1").value || "-";
   const endDate = "-"; // End Date non-aktif karena progres awal masih 0%
 
@@ -194,11 +136,7 @@ window.simpanDataBaru = async function() {
       product,
       sn,
       optional,
-      customer,
-      statusPo,
-      po,
       picQc,
-      planShipped,
       startDate,
       endDate,
       progres: 0, // Progres awal 0%
