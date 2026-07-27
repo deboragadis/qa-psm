@@ -1,6 +1,5 @@
 import { 
-  signInWithEmailAndPassword, 
-  signOut 
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
@@ -19,14 +18,14 @@ formLogin.addEventListener("submit", async (event) => {
   event.preventDefault();
   alertBox.style.display = "none";
 
-  const inputEmail = document.getElementById("username").value.trim();
+  const inputEmail = document.getElementById("email").value.trim();
   const inputPassword = document.getElementById("password").value.trim();
 
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = "Memproses...";
 
   try {
-    // ✅ Firebase handle authentication di server (aman!)
+    // ✅ Firebase handle authentication (aman!)
     const userCredential = await signInWithEmailAndPassword(auth, inputEmail, inputPassword);
     const user = userCredential.user;
 
