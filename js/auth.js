@@ -3,7 +3,7 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-
 import { auth, db } from "./firebase-config.js";
 
 // =========================================================================
-// FIREBASE AUTH + ROLE-BASED ACCESS CONTROL (RBAC) SECURITY GUARD
+// FIREBASE AUTH + ROLE-BASED ACCESS CONTROL (RBAC)
 // =========================================================================
 
 let currentUserRole = "guest";
@@ -34,7 +34,7 @@ const permissions = {
   ]
 };
 
-// ✅ 1. LISTEN TO FIREBASE AUTH STATE
+// ✅ LISTEN TO FIREBASE AUTH STATE
 onAuthStateChanged(auth, async (user) => {
   const currentPage = window.location.pathname.split("/").pop() || "dashboard.html";
 
@@ -42,7 +42,6 @@ onAuthStateChanged(auth, async (user) => {
     // ❌ User tidak login
     console.log("User tidak login, redirect ke login...");
     
-    // Hanya redirect jika bukan login page
     if (currentPage !== "index.html" && currentPage !== "login.html") {
       window.location.href = "index.html";
     }
@@ -54,7 +53,7 @@ onAuthStateChanged(auth, async (user) => {
   currentUserUid = user.uid;
 
   try {
-    // ✅ 2. AMBIL ROLE DARI FIRESTORE
+    // ✅ AMBIL ROLE DARI FIRESTORE
     const userDoc = await getDoc(doc(db, "users", user.uid));
     
     if (!userDoc.exists()) {
@@ -75,7 +74,7 @@ onAuthStateChanged(auth, async (user) => {
 
     console.log("User role:", currentUserRole);
 
-    // ✅ 3. VALIDASI AKSES HALAMAN (URL GUARD)
+    // ✅ VALIDASI AKSES HALAMAN (URL GUARD)
     const allowedPages = permissions[currentUserRole] || [];
 
     if (currentPage !== "index.html" && !allowedPages.includes(currentPage)) {
@@ -85,10 +84,10 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
 
-    // ✅ 4. FILTER MENU SIDEBAR BERDASARKAN ROLE
+    // ✅ FILTER MENU SIDEBAR BERDASARKAN ROLE
     filterMenuByRole(currentUserRole, allowedPages);
 
-    // ✅ 5. TAMPILKAN HALAMAN DENGAN MULUS
+    // ✅ TAMPILKAN HALAMAN
     document.documentElement.style.visibility = "visible";
     document.body.style.opacity = "1";
 
@@ -108,24 +107,22 @@ function filterMenuByRole(role, allowedPages) {
     const onclickAttr = item.getAttribute("onclick");
     
     if (onclickAttr) {
-      // Extract page name dari onclick attribute
       const match = onclickAttr.match(/['"]([^'"]+)['"]/);
       
       if (match && match[1]) {
         const targetPage = match[1];
         
-        // Sembunyikan menu jika user tidak punya akses
         if (!allowedPages.includes(targetPage)) {
           item.style.display = "none";
         } else {
-          item.style.display = ""; // Tampilkan menu
+          item.style.display = "";
         }
       }
     }
   });
 }
 
-// ✅ LOGOUT FUNCTION (bisa dipanggil dari dashboard)
+// ✅ LOGOUT FUNCTION
 export async function logoutUser() {
   try {
     await signOut(auth);
@@ -136,7 +133,7 @@ export async function logoutUser() {
   }
 }
 
-// ✅ GET CURRENT USER INFO
+// ✅ GET USER INFO
 export function getCurrentUserRole() {
   return currentUserRole;
 }
@@ -145,7 +142,7 @@ export function getCurrentUserUid() {
   return currentUserUid;
 }
 
-// ✅ CHECK IF USER HAS PERMISSION (untuk dynamic checks)
+// ✅ CHECK PERMISSION
 export function hasPermission(pageName) {
   const allowedPages = permissions[currentUserRole] || [];
   return allowedPages.includes(pageName);
