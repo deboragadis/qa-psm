@@ -14,10 +14,10 @@ function showNotification(message, type) {
   alertBox.className = type === "success" ? "alert-box alert-success" : "alert-box alert-error";
 }
 
-// ✅ CUSTOM LOGIN FUNCTION - SUPPORT USERNAME!
+// ✅ CUSTOM LOGIN FUNCTION - LOGIN DENGAN USERNAME!
 async function loginWithUsername(username, password) {
   try {
-    // 1. Cari user di Firestore by username
+    // 1. Query Firestore untuk cari user by username
     const usersRef = collection(db, "users");
     const q = query(usersRef, where("username", "==", username));
     const snapshot = await getDocs(q);
@@ -27,24 +27,27 @@ async function loginWithUsername(username, password) {
     }
 
     // 2. Ambil email dari hasil query
-    const userData = snapshot.docs[0].data();
-    const email = userData.email;
+    const userData = snapshot.data();
+    const userDoc = snapshot.docs[0];
+    const userDataComplete = userDoc.data();
+    const email = userDataComplete.email;
 
-    // 3. Login ke Firebase dengan email
+    console.log("Username ditemukan, email:", email);
+
+    // 3. Login ke Firebase dengan email + password
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // 4. Ambil data user dari Firestore
-    const userDoc = snapshot.docs[0];
-    const userDataComplete = userDoc.data();
+    console.log("Login berhasil:", user.email);
 
-    // 5. Simpan ke localStorage
+    // 4. Simpan ke localStorage
     localStorage.setItem("active_user_role", userDataComplete.role);
     localStorage.setItem("loggedInUser", userDataComplete.username);
     localStorage.setItem("user_uid", user.uid);
 
     return userCredential;
   } catch (error) {
+    console.error("Login error:", error);
     throw error;
   }
 }
@@ -61,7 +64,7 @@ formLogin.addEventListener("submit", async (event) => {
   btnSubmit.innerHTML = "Memproses...";
 
   try {
-    // ✅ GUNAKAN LOGIN DENGAN USERNAME!
+    // ✅ LOGIN DENGAN USERNAME!
     await loginWithUsername(inputUsername, inputPassword);
 
     showNotification("Berhasil masuk! Mengalihkan...", "success");
@@ -71,7 +74,7 @@ formLogin.addEventListener("submit", async (event) => {
     }, 1200);
 
   } catch (error) {
-    console.error("Login error:", error.code);
+    console.error("Login error:", error.code, error.message);
 
     let errorMessage = "Login gagal!";
     
@@ -81,6 +84,8 @@ formLogin.addEventListener("submit", async (event) => {
       errorMessage = "Password salah";
     } else if (error.code === "auth/too-many-requests") {
       errorMessage = "Terlalu banyak percobaan login, coba lagi nanti";
+    } else if (error.code === "auth/user-not-found") {
+      errorMessage = "Username tidak ditemukan";
     }
 
     showNotification(errorMessage, "error");
