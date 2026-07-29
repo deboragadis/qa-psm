@@ -7,6 +7,9 @@
     <title>Sistem Informasi QC</title>
     <link rel="icon" type="image/png" href="assets/fmlx.png">
     <style>
+      /* Proteksi Anti-Blinking */
+      html { visibility: hidden; }
+
       @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 
       * {
@@ -245,13 +248,12 @@
 
     <div class="wrapper">
       <div class="form-wrapper sign-in">
-        <form id="loginForm">
+        <form id="loginForm" method="POST">
           <h2>Sistem Informasi QC</h2>
           <p class="subtitle">Tracking Web Dashboard</p>
 
           <div id="alertBox" class="alert-box"></div>
 
-          <!-- ✅ INPUT USERNAME -->
           <div class="input-group">
             <input type="text" id="username" required autocomplete="off" />
             <label for="username">Username</label>
@@ -271,8 +273,7 @@
       </div>
     </div>
 
-    <!-- ✅ LOAD LOGIN.JS (BUKAN login-database.js) -->
-    <script type="module" src="js/login.js"></script>
-
+    <script src="js/database.js"></script>
+    <script type="module" src="js/auth.js"></script>
   </body>
 </html>
