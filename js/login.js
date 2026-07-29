@@ -14,10 +14,10 @@ function showNotification(message, type) {
   alertBox.className = type === "success" ? "alert-box alert-success" : "alert-box alert-error";
 }
 
-// ✅ CUSTOM LOGIN FUNCTION - LOGIN DENGAN USERNAME!
+// ✅ CUSTOM LOGIN FUNCTION - DIPERBAIKI!
 async function loginWithUsername(username, password) {
   try {
-    // 1. Query Firestore untuk cari user by username
+    // 1. Query Firestore untuk cari user by username di koleksi "users"
     const usersRef = collection(db, "users");
     const q = query(usersRef, where("username", "==", username));
     const snapshot = await getDocs(q);
@@ -26,15 +26,14 @@ async function loginWithUsername(username, password) {
       throw new Error("Username tidak ditemukan");
     }
 
-    // 2. Ambil email dari hasil query
-    const userData = snapshot.data();
+    // 2. ✅ AMBIL DATA DARI DOKUMEN PERTAMA (PERBAIKAN DISINI)
     const userDoc = snapshot.docs[0];
     const userDataComplete = userDoc.data();
     const email = userDataComplete.email;
 
     console.log("Username ditemukan, email:", email);
 
-    // 3. Login ke Firebase dengan email + password
+    // 3. Login ke Firebase Auth dengan email + password
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
@@ -64,7 +63,6 @@ formLogin.addEventListener("submit", async (event) => {
   btnSubmit.innerHTML = "Memproses...";
 
   try {
-    // ✅ LOGIN DENGAN USERNAME!
     await loginWithUsername(inputUsername, inputPassword);
 
     showNotification("Berhasil masuk! Mengalihkan...", "success");
