@@ -7,9 +7,6 @@
     <title>Sistem Informasi QC</title>
     <link rel="icon" type="image/png" href="assets/fmlx.png">
     <style>
-      /* Proteksi Anti-Blinking */
-      html { visibility: hidden; }
-
       @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 
       * {
@@ -27,6 +24,7 @@
         color: #334155;
       }
 
+      /* --- VIDEO BACKGROUND --- */
       .video-container {
         position: fixed;
         top: 0;
@@ -49,18 +47,28 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(15, 23, 42, 0.65);
+        background: rgba(
+          15,
+          23,
+          42,
+          0.65
+        ); /* Lapisan gelap agar form tetap terbaca */
       }
 
+      /* --- EFEK GLASSMORPHISM (KACA TRANSPARAN) PADA KOTAK UTAMA --- */
       .wrapper {
         position: relative;
         width: 100%;
         max-width: 420px;
         margin: 20px;
         padding: 10px;
+
+        /* Background transparan dan efek blur (kaca) */
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
+
+        /* Border tipis putih transparan agar terlihat elegan */
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         border-radius: 20px;
@@ -78,7 +86,7 @@
 
       h2 {
         font-size: 26px;
-        color: #ffffff;
+        color: #ffffff; /* Ubah ke putih agar terbaca */
         text-align: center;
         margin-bottom: 6px;
         font-weight: 700;
@@ -88,7 +96,7 @@
       .subtitle {
         text-align: center;
         font-size: 13px;
-        color: #cbd5e1;
+        color: #cbd5e1; /* Warna abu-abu terang */
         margin-bottom: 25px;
         font-weight: 500;
       }
@@ -121,13 +129,16 @@
         margin-bottom: 30px;
       }
 
+      /* --- EFEK TRANSPARAN PADA KOLOM INPUT --- */
       .input-group input {
         width: 100%;
         height: 52px;
         font-size: 14px;
         font-weight: 500;
-        color: #ffffff;
+        color: #ffffff; /* Teks inputan putih */
         padding: 0 16px;
+
+        /* Background dan border inputan dibuat transparan */
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 12px;
@@ -136,7 +147,7 @@
       }
 
       .input-group input:focus {
-        border-color: #818cf8;
+        border-color: #818cf8; /* Warna border saat aktif (biru terang) */
         background: rgba(255, 255, 255, 0.15);
         box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.2);
       }
@@ -147,7 +158,7 @@
         left: 16px;
         transform: translateY(-50%);
         font-size: 14px;
-        color: #cbd5e1;
+        color: #cbd5e1; /* Label warna abu terang */
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         padding: 0 4px;
@@ -156,12 +167,17 @@
 
       .input-group input:focus ~ label,
       .input-group input:valid ~ label {
-        top: -11px;
+        top: -11px; /* Naikkan posisi ke atas garis border */
         left: 14px;
         font-size: 11px;
         color: #818cf8;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 0 6px;
+        background: rgba(
+          255,
+          255,
+          255,
+          0.05
+        ); /* Background gelap transparan agar menutupi garis border dengan rapi */
+        padding: 0 6px; /* Beri jarak di samping teks */
         border-radius: 4px;
         font-weight: 600;
       }
@@ -241,14 +257,14 @@
   <body>
     <div class="video-container">
       <video autoplay loop muted playsinline class="bg-video">
-        <source src="assets/video-login.mp4" type="video/mp4" />
+        <source src="assets/video-login.mp4 " type="video/mp4" />
       </video>
       <div class="video-overlay"></div>
     </div>
 
     <div class="wrapper">
       <div class="form-wrapper sign-in">
-        <form id="loginForm" method="POST">
+        <form id="loginForm">
           <h2>Sistem Informasi QC</h2>
           <p class="subtitle">Tracking Web Dashboard</p>
 
@@ -273,7 +289,58 @@
       </div>
     </div>
 
-    <script src="js/database.js"></script>
-    <script type="module" src="js/auth.js"></script>
+    <script src="js/login-database.js"></script>
+
+    <script>
+      const formLogin = document.getElementById("loginForm");
+      const alertBox = document.getElementById("alertBox");
+      const btnSubmit = document.getElementById("btnSubmit");
+
+      function showNotification(message, type) {
+        alertBox.style.display = "block";
+        alertBox.textContent = message;
+
+        if (type === "success") {
+          alertBox.className = "alert-box alert-success";
+        } else {
+          alertBox.className = "alert-box alert-error";
+        }
+      }
+
+      formLogin.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        alertBox.style.display = "none";
+
+        const inputUser = document.getElementById("username").value.trim();
+        const inputPass = document.getElementById("password").value.trim();
+
+        const user = registeredAccounts.find(
+          (acc) => acc.username === inputUser && acc.password === inputPass,
+        );
+
+        if (user) {
+          localStorage.setItem("active_user_role", user.role);
+          localStorage.setItem("loggedInUser", user.username);
+
+          showNotification("Berhasil masuk! Mengalihkan...", "success");
+
+          btnSubmit.innerHTML = "Memproses...";
+          btnSubmit.disabled = true;
+
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1200);
+        } else {
+          showNotification(
+            "Akses ditolak! Username atau password salah.",
+            "error",
+          );
+
+          document.getElementById("password").value = "";
+          document.getElementById("password").focus();
+        }
+      });
+    </script>
   </body>
 </html>
