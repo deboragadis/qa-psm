@@ -1,6 +1,6 @@
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
-import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { auth, db } from "./firebase.js"; // Sesuaikan dengan nama file aslimu (firebase.js atau firebase-config.js)
 
 // =========================================================================
 // FIREBASE AUTH + ROLE-BASED ACCESS CONTROL (RBAC)
