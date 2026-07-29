@@ -4,7 +4,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const role = localStorage.getItem("active_user_role") || "guest";
   const currentPage = window.location.pathname.split("/").pop() || "dashboard.html";
-
   // Definisi hak akses halaman berdasarkan role
   const permissions = {
     superadmin: [
@@ -29,16 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
       "packing.html"
     ]
   };
-
   const allowedPages = permissions[role] || [];
-
   // 1. Validasi Akses Halaman (URL Guard)
   if (currentPage !== "index.html" && !allowedPages.includes(currentPage)) {
     alert("Akses ditolak! Anda tidak memiliki izin untuk mengakses halaman ini.");
     window.location.href = "dashboard.html";
     return;
   }
-
   // 2. Filter Menu Sidebar secara Otomatis
   const menuItems = document.querySelectorAll(".sidebar-menu li");
   menuItems.forEach(item => {
@@ -53,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
-
   // 3. Munculkan kembali halaman dengan mulus setelah filter selesai
   document.documentElement.style.visibility = "visible";
 });
