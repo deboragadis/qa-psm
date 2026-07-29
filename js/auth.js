@@ -1,5 +1,5 @@
 // =========================================================================
-// ROLE-BASED ACCESS CONTROL (RBAC) SECURITY GUARD (LOCAL)
+// ROLE-BASED ACCESS CONTROL (RBAC) SECURITY GUARD
 // =========================================================================
 document.addEventListener("DOMContentLoaded", () => {
   const role = localStorage.getItem("active_user_role") || "guest";
@@ -54,15 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 3. Munculkan kembali halaman setelah filter selesai
+  // 3. Munculkan kembali halaman dengan mulus setelah filter selesai
   document.documentElement.style.visibility = "visible";
 });
-
-window.logoutUser = function() {
-  const konfirmasi = confirm("Apakah Anda yakin ingin keluar?");
-  if (konfirmasi) {
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("active_user_role");
-    window.location.href = "index.html";
-  }
-};
